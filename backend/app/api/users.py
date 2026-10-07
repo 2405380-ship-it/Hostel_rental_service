@@ -55,6 +55,8 @@ def onboard_user(
     current_user.display_name = sanitize_text(payload.display_name)
     current_user.username = clean_username
     current_user.hostel_block = sanitize_text(payload.hostel_block)
+    if payload.phone_number:
+        current_user.phone_number = payload.phone_number.strip()
     if payload.avatar_url:
         current_user.avatar_url = sanitize_url(payload.avatar_url)
     current_user.is_onboarded = True

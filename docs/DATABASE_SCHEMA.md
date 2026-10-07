@@ -28,7 +28,8 @@ erDiagram
 
     USERS {
         int id PK
-        string phone_number UK "E.164 unique, indexed"
+        string email UK "University email, unique, indexed"
+        string phone_number "Optional contact phone (Private)"
         string display_name "Preferred name"
         string username UK "Regex validated ^[a-zA-Z0-9_]{3,20}$"
         string hostel_block "Block & Wing (Private)"
@@ -124,7 +125,8 @@ Stores student accounts authenticated via phone OTP. Contains identity details, 
 | Column Name | Data Type | Constraints | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | `id` | `INTEGER` | `PRIMARY KEY`, Auto-increment | — | Unique user identifier. |
-| `phone_number` | `VARCHAR(20)` | `NOT NULL`, `UNIQUE`, `INDEX` | — | E.164 phone string (e.g., `+919876543210`). Private. |
+| `email` | `VARCHAR(150)` | `UNIQUE`, `INDEX`, `NULLABLE` | `NULL` | Student university email (e.g. `student@kiit.ac.in`). Private. |
+| `phone_number` | `VARCHAR(50)` | `INDEX`, `NULLABLE` | `NULL` | Optional contact/WhatsApp phone number. Private. |
 | `display_name` | `VARCHAR(100)` | `NULLABLE` | `NULL` | Student's preferred public display name. |
 | `username` | `VARCHAR(50)` | `UNIQUE`, `INDEX`, `NULLABLE` | `NULL` | Campus handle matching `^[a-zA-Z0-9_]{3,20}$`. |
 | `hostel_block` | `VARCHAR(100)` | `NULLABLE` | `NULL` | Hostel wing and room. **Strictly private; omitted from public profiles.** |

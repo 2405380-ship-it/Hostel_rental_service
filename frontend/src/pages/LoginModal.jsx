@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { X, Phone, KeyRound, ShieldCheck, Sparkles, User, Building, AlertCircle } from 'lucide-react';
+import { X, Phone, Mail, KeyRound, ShieldCheck, Sparkles, User, Building, AlertCircle } from 'lucide-react';
 import { api } from '../services/api';
 
 const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,20}$/;
 
 export default function LoginModal({ isOpen, onClose, onAuthSuccess }) {
   const [step, setStep] = useState('phone'); // 'phone' | 'otp' | 'onboard'
-  const [phoneNumber, setPhoneNumber] = useState('+91');
+  const [identifier, setIdentifier] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -16,21 +16,28 @@ export default function LoginModal({ isOpen, onClose, onAuthSuccess }) {
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
   const [hostelBlock, setHostelBlock] = useState('');
+  const [optionalPhone, setOptionalPhone] = useState('');
   const [usernameError, setUsernameError] = useState(null);
 
   if (!isOpen) return null;
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
-    if (phoneNumber.trim().length < 8) {
-      setError('Please enter a valid phone number with country code (e.g. +91 9876543210).');
+    const trimmed = identifier.trim();
+    if (trimmed.includes('@')) {
+      if (!trimmed.includes('.') || trimmed.length < 5) {
+        setError('Please enter a valid university email address (e.g. student@kiit.ac.in).');
+        return;
+      }
+    } else if (trimmed.length < 8) {
+      setError('Please enter a valid university email or phone number with country code.');
       return;
     }
 
     setLoading(true);
     setError(null);
     try {
-      const res = await api.sendOtp(phoneNumber.trim());
+      const res = await api.sendOtp(trimmed);
       setDevOtpHint(res.data.dev_mock_otp || '123456');
       setStep('otp');
     } catch (err) {
@@ -50,7 +57,7 @@ export default function LoginModal({ isOpen, onClose, onAuthSuccess }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.verifyOtp(phoneNumber.trim(), otpCode.trim());
+      const res = await api.verifyOtp(identifier.trim(), otpCode.trim());
       const { access_token, is_onboarded, user } = res.data;
 
       localStorage.setItem('hostelshare_token', access_token);
@@ -125,7 +132,7 @@ export default function LoginModal({ isOpen, onClose, onAuthSuccess }) {
           </h2>
           <p className="text-xs text-zinc-500 mt-1 font-mono">
             {step === 'phone' && 'Peer-to-peer campus rentals with mutual privacy shields'}
-            {step === 'otp' && `Sent via SMS to ${phoneNumber}`}
+            {step === 'otp' && (identifier.includes('@') ? `Code sent to ${identifier}` : `Sent via SMS to ${identifier}`)}
             {step === 'onboard' && 'Choose your campus handle and hostel details'}
           </p>
         </div>
@@ -137,22 +144,22 @@ export default function LoginModal({ isOpen, onClose, onAuthSuccess }) {
           </div>
         )}
 
-        {/* STEP 1: Phone number */}
+        {/* STEP 1: Email or Phone */}
         {step === 'phone' && (
           <form onSubmit={handleSendOtp} className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-zinc-800 mb-1.5">
-                Phone Number (with Country Code)
+                University Email or Phone Number
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
-                  <Phone className="w-4 h-4" />
+                  {identifier.includes('@') ? <Mail className="w-4 h-4 text-emerald-600" /> : <Phone className="w-4 h-4" />}
                 </div>
                 <input
                   type="text"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="+91 98765 43210"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  placeholder="student@kiit.ac.in or +91 9876543210"
                   className="w-full bg-zinc-50 border border-zinc-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-950 font-mono"
                   required
                   autoFocus
@@ -165,7 +172,7 @@ export default function LoginModal({ isOpen, onClose, onAuthSuccess }) {
               disabled={loading}
               className="w-full py-2.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-white font-semibold text-xs shadow-xs transition-all disabled:opacity-50"
             >
-              {loading ? 'Sending OTP...' : 'Send Verification OTP'}
+              {loading ? 'Sending OTP...' : 'Send Verification Code'}
             </button>
 
             <div className="text-center">
@@ -224,7 +231,7 @@ export default function LoginModal({ isOpen, onClose, onAuthSuccess }) {
                 onClick={() => setStep('phone')}
                 className="text-zinc-500 hover:text-zinc-950"
               >
-                Change Number
+                Change Email / Number
               </button>
               <button
                 type="button"

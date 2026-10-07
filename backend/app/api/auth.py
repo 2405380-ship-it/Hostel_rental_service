@@ -99,10 +99,16 @@ def verify_otp(payload: VerifyOTPIn, db: Session = Depends(get_db)):
             detail="Invalid or expired verification code."
         )
 
-    user = db.query(User).filter(User.phone_number == clean_id).first()
+    user = None
+    if is_email:
+        user = db.query(User).filter(User.email == clean_id).first()
+    else:
+        user = db.query(User).filter(User.phone_number == clean_id).first()
+
     if not user:
         user = User(
-            phone_number=clean_id,
+            email=clean_id if is_email else None,
+            phone_number=clean_id if not is_email else None,
             display_name=None,
             username=None,
             hostel_block=None,
@@ -115,7 +121,7 @@ def verify_otp(payload: VerifyOTPIn, db: Session = Depends(get_db)):
         db.refresh(user)
         logger.info("Provisioned new user account with identifier %s", clean_id)
 
-    token = create_access_token(data={"sub": str(user.id), "phone": user.phone_number})
+    token = create_access_token(data={"sub": str(user.id), "identifier": clean_id})
     
     return TokenOut(
         access_token=token,

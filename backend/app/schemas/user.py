@@ -17,6 +17,7 @@ class UserOnboardIn(BaseModel):
     username: str = Field(..., min_length=3, max_length=20)
     hostel_block: str = Field(..., min_length=2, max_length=100)
     avatar_url: Optional[str] = None
+    phone_number: Optional[str] = None
 
     @field_validator("username")
     def validate_username(cls, v: str) -> str:
@@ -28,6 +29,7 @@ class UserUpdateIn(BaseModel):
     display_name: Optional[str] = Field(None, min_length=2, max_length=100)
     hostel_block: Optional[str] = Field(None, min_length=2, max_length=100)
     avatar_url: Optional[str] = None
+    phone_number: Optional[str] = None
 
 class UserBasicOut(BaseModel):
     id: int
@@ -42,7 +44,8 @@ class UserBasicOut(BaseModel):
 
 class UserOut(BaseModel):
     id: int
-    phone_number: str
+    email: Optional[str] = None
+    phone_number: Optional[str] = None
     display_name: Optional[str]
     username: Optional[str]
     hostel_block: Optional[str]
