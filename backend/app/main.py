@@ -37,6 +37,15 @@ def run_auto_migrations(db_engine):
                 with db_engine.begin() as conn:
                     conn.execute(text("ALTER TABLE users ADD COLUMN email VARCHAR(150);"))
                 logger.info("Auto-migrating: 'email' column added successfully!")
+
+            # If running on PostgreSQL (Supabase), relax phone_number NOT NULL constraint
+            if "phone_number" in columns and not str(db_engine.url).startswith("sqlite"):
+                try:
+                    with db_engine.begin() as conn:
+                        conn.execute(text("ALTER TABLE users ALTER COLUMN phone_number DROP NOT NULL;"))
+                    logger.info("Auto-migrating: relaxed 'phone_number' NOT NULL constraint on PostgreSQL.")
+                except Exception:
+                    pass
     except Exception as e:
         logger.warning("Auto-migration check notice: %s", e)
 

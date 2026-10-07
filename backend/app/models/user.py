@@ -8,7 +8,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(150), unique=True, index=True, nullable=True)
-    phone_number = Column(String(50), unique=True, index=True, nullable=True)
+    phone_number = Column(String(150), unique=True, index=True, nullable=True)
     display_name = Column(String(100), nullable=True)
     username = Column(String(50), unique=True, index=True, nullable=True)
     hostel_block = Column(String(100), nullable=True)

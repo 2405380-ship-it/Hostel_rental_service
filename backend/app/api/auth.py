@@ -101,14 +101,15 @@ def verify_otp(payload: VerifyOTPIn, db: Session = Depends(get_db)):
 
     user = None
     if is_email:
-        user = db.query(User).filter(User.email == clean_id).first()
+        user = db.query(User).filter((User.email == clean_id) | (User.phone_number == clean_id)).first()
     else:
         user = db.query(User).filter(User.phone_number == clean_id).first()
 
     if not user:
         user = User(
             email=clean_id if is_email else None,
-            phone_number=clean_id if not is_email else None,
+            # Assign clean_id to phone_number to ensure legacy NOT NULL & UNIQUE constraints pass on SQLite/PostgreSQL
+            phone_number=clean_id,
             display_name=None,
             username=None,
             hostel_block=None,
@@ -120,6 +121,11 @@ def verify_otp(payload: VerifyOTPIn, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(user)
         logger.info("Provisioned new user account with identifier %s", clean_id)
+    else:
+        if is_email and not user.email:
+            user.email = clean_id
+            db.commit()
+            db.refresh(user)
 
     token = create_access_token(data={"sub": str(user.id), "identifier": clean_id})
     

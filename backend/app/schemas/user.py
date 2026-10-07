@@ -55,6 +55,12 @@ class UserOut(BaseModel):
     is_onboarded: bool
     created_at: datetime
 
+    @field_validator("phone_number", mode="before")
+    def sanitize_phone_number(cls, v):
+        if v and "@" in str(v):
+            return None
+        return v
+
     class Config:
         from_attributes = True
 
