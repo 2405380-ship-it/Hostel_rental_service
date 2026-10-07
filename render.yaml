@@ -28,3 +28,7 @@ services:
         value: hostelshare-media
       - key: DEV_MOCK_OTP
         value: "123456"
+      - key: RESEND_API_KEY
+        sync: false # Set in Render Dashboard with your Resend API Key (re_...)
+      - key: EMAILS_FROM
+        value: "HostelShare <onboarding@resend.dev>"

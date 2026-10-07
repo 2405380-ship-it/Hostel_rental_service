@@ -190,6 +190,19 @@ def accept_rental(
 
     db.commit()
     db.refresh(rental)
+
+    # Dispatch email notification to borrower if registered with email
+    if rental.borrower and "@" in (rental.borrower.phone_number or ""):
+        from app.core.email import send_rental_notification_email
+        item_title = rental.item.title if rental.item else "your requested item"
+        lender_name = current_user.display_name or "The owner"
+        send_rental_notification_email(
+            to_email=rental.borrower.phone_number,
+            subject=f"Rental Accepted: {item_title}",
+            headline="Your Rental Request Was Accepted!",
+            message=f"{lender_name} has accepted your rental request for <strong>{item_title}</strong>. Meet in person at your campus hostel to complete the physical handover handshake."
+        )
+
     return format_rental_out(rental, current_user.id)
 
 @router.post("/{rental_id}/verify-handover", response_model=RentalOut)
