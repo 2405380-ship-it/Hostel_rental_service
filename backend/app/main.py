@@ -16,9 +16,32 @@ logging.basicConfig(
 )
 logger = logging.getLogger("hostelshare.main")
 
+from sqlalchemy import inspect, text
+
 # Auto-generate database tables on startup
 logger.info("Initializing database schema on engine: %s", engine.url)
 Base.metadata.create_all(bind=engine)
+
+def run_auto_migrations(db_engine):
+    """
+    Ensures backwards-compatible schema evolutions (e.g. adding 'email' column to 'users' table)
+    on startup across both SQLite and Supabase PostgreSQL.
+    """
+    try:
+        inspector = inspect(db_engine)
+        table_names = inspector.get_table_names()
+        if "users" in table_names:
+            columns = [c["name"] for c in inspector.get_columns("users")]
+            if "email" not in columns:
+                logger.info("Auto-migrating: adding missing 'email' column to 'users' table...")
+                with db_engine.begin() as conn:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN email VARCHAR(150);"))
+                logger.info("Auto-migrating: 'email' column added successfully!")
+    except Exception as e:
+        logger.warning("Auto-migration check notice: %s", e)
+
+run_auto_migrations(engine)
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
