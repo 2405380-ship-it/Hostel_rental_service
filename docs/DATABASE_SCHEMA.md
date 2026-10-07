@@ -24,6 +24,7 @@ erDiagram
     RENTAL_REQUESTS ||--o{ REVIEWS : "evaluated in"
 
     CHATS ||--o{ MESSAGES : "contains (CASCADE)"
+    USERS ||--o{ FEEDBACKS : "submits (SET NULL)"
 
     USERS {
         int id PK
@@ -94,6 +95,21 @@ erDiagram
         int reviewee_id FK "References USERS.id (CASCADE)"
         int rating "Mandatory 1-5 integer star rating"
         text comment "Peer feedback commentary"
+        datetime created_at "Submission timestamp"
+    }
+
+    FEEDBACKS {
+        int id PK
+        int user_id FK "References USERS.id (SET NULL)"
+        varchar name "Submitter name or Anonymous"
+        varchar email "Submitter contact email"
+        varchar role "Student, Faculty Evaluator, Guest"
+        varchar category "Overall Experience, Feature Request, Bug"
+        int overall_rating "1-5 rating"
+        int ease_of_use "1-5 rating"
+        int trust_safety "1-5 rating"
+        varchar recommend "Definitely, Likely, Neutral"
+        text feedback_text "Sanitized feedback narrative"
         datetime created_at "Submission timestamp"
     }
 ```
@@ -201,6 +217,26 @@ Peer evaluation submitted after item return. Drives the campus trust score.
 | `rating` | `INTEGER` | `NOT NULL`, Check `1 <= rating <= 5` | — | Star rating from 1 to 5. |
 | `comment` | `TEXT` | `NULLABLE` | `NULL` | Detailed written peer feedback. |
 | `created_at` | `TIMESTAMP` | `NOT NULL` | `utcnow()` | Review submission timestamp. |
+
+---
+
+### 2.7 Table: `feedbacks`
+Captures student, faculty evaluator, and hostel resident reviews, bug reports, and rating scores for campus project evaluation.
+
+| Column Name | Data Type | Constraints | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | `PRIMARY KEY`, Auto-increment | — | Unique feedback record identifier. |
+| `user_id` | `INTEGER` | `FOREIGN KEY (users.id) ON DELETE SET NULL`, `NULLABLE` | `NULL` | Optional link to authenticated user account. |
+| `name` | `VARCHAR(100)` | `NULLABLE` | `NULL` | Submitter name (or sanitized "Anonymous Peer"). |
+| `email` | `VARCHAR(150)` | `NULLABLE` | `NULL` | Submitter contact or institutional email. |
+| `role` | `VARCHAR(50)` | `NOT NULL` | `'Student'` | Submitter category (`Student`, `Faculty Evaluator`, `Hostel Resident`, `Guest`). |
+| `category` | `VARCHAR(50)` | `NOT NULL` | `'Overall Experience'` | Feedback topic (`Overall Experience`, `Feature Request`, `Bug Report`, etc.). |
+| `overall_rating`| `INTEGER` | `NOT NULL`, Check `1 <= rating <= 5` | `5` | Comprehensive platform rating from 1 to 5. |
+| `ease_of_use` | `INTEGER` | `NULLABLE`, Check `1 <= rating <= 5` | `5` | Usability score from 1 to 5. |
+| `trust_safety` | `INTEGER` | `NULLABLE`, Check `1 <= rating <= 5` | `5` | Privacy and dual-handshake safety score from 1 to 5. |
+| `recommend` | `VARCHAR(20)` | `NULLABLE` | `'Definitely'` | Net Promoter recommendation (`Definitely`, `Likely`, `Neutral`, `Unlikely`). |
+| `feedback_text`| `TEXT` | `NOT NULL` | — | HTML-escaped, control-character sanitized evaluation comments. |
+| `created_at` | `TIMESTAMP` | `NOT NULL` | `utcnow()` | Feedback submission timestamp. |
 
 ---
 

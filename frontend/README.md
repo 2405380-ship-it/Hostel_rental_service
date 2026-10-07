@@ -7,61 +7,62 @@ High-performance, mobile-responsive React web application built with Vite and Ta
 ## Features
 
 - **Local Wi-Fi Multi-Phone Testing**:
-  - Configured with `vite-plugin-qrcode` and `server: { host: "0.0.0.0", port: 5173 }`.
-  - When started, an **ASCII QR Code** displays directly in your terminal.
-  - Scan the QR code with any smartphone connected to the same campus Wi-Fi router to instantly test.
+  - Configured with `server: { host: "0.0.0.0", port: 5173 }`.
+  - Scan terminal QR code with any smartphone connected to the same campus Wi-Fi network to test instantly.
 - **Mutual Privacy Shield**:
   - Masked phone numbers in deal chat headers (`+91 ••••• ••123`).
   - One-tap mutual consent toggle reveals full contact details only when both parties click "Share Phone Number".
 - **Dual-Handshake State Machine UI**:
   - Live state tracking (`PENDING` $\to$ `ACCEPTED` $\to$ `ACTIVE` $\to$ `RETURNED` $\to$ `COMPLETED`).
   - Interactive PIN modal for displaying secret 4-digit codes and submitting verification.
-- **1-to-5 Star Peer Reviews**:
-  - Interactive star rating and feedback modal after item return.
+- **Peer Reviews & Campus Feedback**:
+  - Interactive 1-to-5 star rating and feedback modal after item return.
+  - Dedicated campus feedback system for students and faculty.
 - **Sanitized Public Profiles (`/u/:username`)**:
   - Public view strictly concealing phone numbers and room/hostel wing locations.
+- **XSS & URI Defense**:
+  - Pure React JSX rendering with zero raw HTML injection (`dangerouslySetInnerHTML`).
+  - Defensive URI resolver blocking `javascript:`, `vbscript:`, and unsafe schemes.
 
 ---
 
-## Setup & Running Locally
+## Environment Configuration (`.env`)
 
-### 1. Install Node Dependencies
+```ini
+# Development: Local backend
+VITE_API_BASE_URL=http://localhost:8000
+
+# Production on Vercel: Render backend URL (no trailing slash)
+# VITE_API_BASE_URL=https://your-backend-name.onrender.com
+```
+
+---
+
+## Local Development
 
 ```bash
 cd frontend
 npm install
-```
-
-### 2. Configure Environment
-
-Copy `.env.example` to `.env`:
-
-```bash
-cp .env.example .env
-```
-
-Ensure `VITE_API_BASE_URL` points to your backend.
-- For local machine testing: `VITE_API_BASE_URL=http://localhost:8000`
-- For multi-phone Wi-Fi testing: Set to your computer's local LAN IP (e.g. `VITE_API_BASE_URL=http://192.168.1.15:8000`)
-
-### 3. Start Development Server with QR Code
-
-```bash
 npm run dev
 ```
 
-The terminal will print:
-```
-  VITE v5.2.13  ready in 240 ms
+Visit [http://localhost:5173](http://localhost:5173).
 
-  ➜  Local:   http://localhost:5173/
-  ➜  Network: http://192.168.1.15:5173/
+---
 
-  [ASCII QR CODE WILL BE DISPLAYED HERE]
-```
+## Production Build & Deploying to Vercel
 
-### 4. Build for Production Bundle
-
+### 1. Build Verification
 ```bash
 npm run build
 ```
+Generates production assets in the `dist/` directory.
+
+### 2. Vercel Deployment Settings
+- **Framework Preset**: `Vite`
+- **Root Directory**: `frontend`
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Environment Variables**:
+  - `VITE_API_BASE_URL`: `https://your-backend-name.onrender.com`
+- **SPA Routing**: Handled automatically via `vercel.json` (`rewrites: [ { "source": "/(.*)", "destination": "/index.html" } ]`), preventing 404 errors on browser page reloads.

@@ -5,10 +5,12 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.security import get_current_user
+from app.core.sanitization import sanitize_text
 from app.models.rental import RentalRequest
 from app.models.chat import Chat, Message
 from app.models.user import User
 from app.schemas.chat import ChatOut, MessageOut, MessageCreateIn, PhoneRevealState
+
 
 logger = logging.getLogger("hostelshare.chat")
 router = APIRouter(prefix="/chat", tags=["Chat & Mutual Privacy Shield"])
@@ -125,10 +127,11 @@ def send_chat_message(
     msg = Message(
         chat_id=chat.id,
         sender_id=current_user.id,
-        content=payload.content.strip()
+        content=sanitize_text(payload.content)
     )
     db.add(msg)
     db.commit()
+
     db.refresh(msg)
 
     return MessageOut(

@@ -159,6 +159,11 @@ stateDiagram-v2
 - **FR-6.3**: Either party can click "Share Phone Number". The counterparty's full phone number is unveiled **if and only if both parties have granted consent**.
 - **FR-6.4**: Expired chats (`expires_at <= current_timestamp`) are purged along with all messages by `scripts/purge_ephemeral.py`.
 
+### 3.7 Functional Requirement 7 (FR-7): Campus Project & Faculty Evaluation System
+- **FR-7.1**: Students, faculty evaluators, and hostel residents can submit structured evaluations across usability, trust, safety, and recommendations.
+- **FR-7.2**: Aggregated real-time metrics (`/api/feedback/stats`) calculate mean satisfaction, ease of use, and recommendation percentages for academic presentation.
+- **FR-7.3**: All submitted feedback text is automatically sanitized to prevent stored Cross-Site Scripting (XSS).
+
 ---
 
 ## 4. External Interface Requirements
@@ -171,17 +176,21 @@ The user interface is responsive across viewport widths from 320px (mobile) to 2
 
 ### 4.2 Software Interfaces
 - **Supabase PostgreSQL**: Configured via connection string format:
-  `postgresql+psycopg2://postgres:[PASSWORD]@[HOST]:5432/postgres`
-- **Supabase Storage**: Authenticated REST API client uploading to public bucket `hostelshare-media`.
+  `postgresql+psycopg2://postgres:[PASSWORD]@[HOST]:5432/postgres` (with connection pooling).
+- **Supabase Storage**: Authenticated REST client uploading to public bucket `hostelshare-media` via `service_role` key.
 
 ---
 
 ## 5. Non-Functional Requirements
 
-### 5.1 Security
+### 5.1 Security & Cyber Defense
 - **NFR-S1**: All user passwords or OTPs are not stored in plaintext. Mock dev OTP `123456` is strictly constrained to development settings.
 - **NFR-S2**: JWT tokens are signed using SHA-256 HMAC and verified on all protected routes.
 - **NFR-S3**: Uploaded media is scanned and stripped of EXIF tags using Pillow to prevent physical location tracking from camera geolocation tags.
+- **NFR-S4 (Anti-Brute-Force Rate Limiting)**: Handshake PIN verification is restricted to **5 failed attempts max**, locking the rental for **300 seconds** upon breach. Sensitive authentication endpoints (`/auth/send-otp`) are throttled to **5 requests per 60 seconds** to thwart SMS/OTP flooding attacks.
+- **NFR-S5 (Stored & Reflected XSS Neutralization)**: All user-supplied text (item descriptions, reviews, feedback, chat messages) undergoes HTML entity escaping and control character stripping before database insertion. Zero instances of `dangerouslySetInnerHTML` permitted in frontend components.
+- **NFR-S6 (Upload Payload Protection)**: Uploads are restricted to image MIME types with a strict **5 MB ceiling**, rejecting oversized payloads with `413 Content Too Large` to prevent memory exhaustion DoS attacks.
+- **NFR-S7 (HTTP Defense Headers)**: All responses enforce `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection: 1; mode=block`, `Referrer-Policy: strict-origin-when-cross-origin`, and `Permissions-Policy` restrictions.
 
 ### 5.2 Privacy & Anonymity
 - **NFR-P1**: Public profile API serializers strictly exclude sensitive address data (`hostel_block`, room numbers) and phone numbers.
@@ -207,4 +216,9 @@ The user interface is responsive across viewport widths from 320px (mobile) to 2
 | **FR-4** | Dual-Handshake Protocol (Handover/Return) | State Machine Test | Automated |
 | **FR-5** | Review & Trust Score Recalculation | Review Math Test | Automated |
 | **FR-6** | Mutual Phone Shield & Ephemeral Purge | Script & Chat Test | Automated |
+| **FR-7** | Campus & Faculty Feedback Evaluation | Feedback API Test | Automated |
 | **NFR-S3**| EXIF Metadata Removal | Pillow Image Test | Automated |
+| **NFR-S4**| Anti-Brute-Force Rate Limiting | Cyber Defense Test Suite | Automated |
+| **NFR-S5**| Stored & Reflected XSS Neutralization | Cyber Defense Test Suite | Automated |
+| **NFR-S6**| 5MB Upload DoS Protection | Cyber Defense Test Suite | Automated |
+| **NFR-S7**| HTTP Security Headers (`nosniff`, `DENY`)| Cyber Defense Test Suite | Automated |

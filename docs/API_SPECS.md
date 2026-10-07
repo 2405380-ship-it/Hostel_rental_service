@@ -32,12 +32,13 @@ Initiates phone number verification by dispatching a 6-digit OTP.
 
 #### Error Responses
 - `400 Bad Request`: `{"detail": "Please provide a valid phone number with country code."}`
+- `429 Too Many Requests`: `{"detail": "Too many OTP requests. Please try again in 59 seconds."}` (Throttled to max 5 req/min per phone)
 
 ---
 
 ### 1.2 Verify OTP & Issue Token
 `POST /api/auth/verify-otp`  
-Verifies OTP code, provisions new user account shell if first login, and returns JWT access token.
+Verifies OTP code, provisions new user account shell if first login, and returns JWT access token. Throttled to max 5 verification attempts per 120 seconds per phone.
 
 #### Request Body
 ```json
@@ -67,6 +68,10 @@ Verifies OTP code, provisions new user account shell if first login, and returns
   }
 }
 ```
+
+#### Error Responses
+- `400 Bad Request`: `{"detail": "Invalid OTP code. Please use the test code 123456."}`
+- `429 Too Many Requests`: `{"detail": "Too many verification attempts. Please try again in 120 seconds."}`
 
 ---
 
@@ -138,6 +143,26 @@ Returns public profile metrics and active listings.
 
 ---
 
+### 2.3 Upload Avatar Photo
+`POST /api/users/upload-avatar` *(Authenticated)*  
+Uploads student avatar image: strips EXIF metadata (camera/GPS coordinates), enforces a 5 MB maximum file ceiling, and uploads to Supabase Storage bucket `hostelshare-media` (`/avatars`).
+
+#### Request (`multipart/form-data`)
+- `file`: Binary image file (`image/jpeg`, `image/png`, `image/webp`, max 5 MB).
+
+#### Response (`200 OK`)
+```json
+{
+  "avatar_url": "https://xyz.supabase.co/storage/v1/object/public/hostelshare-media/avatars/b3c9f...jpg"
+}
+```
+
+#### Error Responses
+- `400 Bad Request`: `{"detail": "Uploaded file must be an image."}`
+- `413 Content Too Large`: `{"detail": "Image exceeds the 5MB maximum allowable limit."}`
+
+---
+
 ## 3. Items & Feed Endpoints
 
 ### 3.1 Fetch Feed Items
@@ -193,6 +218,26 @@ Creates a new listing.
   "image_url": "https://xyz.supabase.co/storage/v1/object/public/hostelshare-media/items/soldering.jpg"
 }
 ```
+
+---
+
+### 3.3 Upload Item Listing Photo
+`POST /api/items/upload-image` *(Authenticated)*  
+Uploads listing photo: strips all camera/GPS EXIF metadata, enforces 5 MB ceiling, and uploads to Supabase Storage bucket `hostelshare-media` (`/items`).
+
+#### Request (`multipart/form-data`)
+- `file`: Binary image file (`image/jpeg`, `image/png`, `image/webp`, max 5 MB).
+
+#### Response (`200 OK`)
+```json
+{
+  "image_url": "https://xyz.supabase.co/storage/v1/object/public/hostelshare-media/items/c91a...jpg"
+}
+```
+
+#### Error Responses
+- `400 Bad Request`: `{"detail": "File must be an image."}`
+- `413 Content Too Large`: `{"detail": "Image exceeds the 5MB maximum allowable limit."}`
 
 ---
 
@@ -253,11 +298,15 @@ Borrower enters Lender's 4-digit PIN upon physical item handover. Transitions st
 }
 ```
 
+#### Error Responses
+- `400 Bad Request`: `{"detail": "Incorrect Handover PIN. Ask lender for the 4-digit code."}`
+- `429 Too Many Requests`: `{"detail": "Too many failed PIN attempts. Verification is locked for 300 seconds to protect this rental."}`
+
 ---
 
 ### 4.4 Verify Return PIN (Return Handshake)
 `POST /api/rentals/{rental_id}/verify-return` *(Authenticated - Lender)*  
-Lender enters Borrower's 4-digit PIN upon receiving item back. Transitions state `ACTIVE` $\to$ `RETURNED`.
+Lender enters Borrower's 4-digit PIN upon receiving item back. Transitions state `ACTIVE` $\to$ `RETURNED`. Enforces brute-force rate limit (5 failed attempts max).
 
 #### Request Body
 ```json
@@ -274,6 +323,10 @@ Lender enters Borrower's 4-digit PIN upon receiving item back. Transitions state
   "is_lender": true
 }
 ```
+
+#### Error Responses
+- `400 Bad Request`: `{"detail": "Incorrect Return PIN. Ask borrower for the 4-digit code."}`
+- `429 Too Many Requests`: `{"detail": "Too many failed PIN attempts. Verification is locked for 300 seconds to protect this rental."}`
 
 ---
 
@@ -335,10 +388,91 @@ Toggles current user's consent. When both agree, unmasked phone is returned in `
 
 ---
 
-## 6. Sample cURL Workflow
+## 6. Campus & Faculty Feedback Endpoints
+
+### 6.1 Submit Platform Evaluation
+`POST /api/feedback` *(Public / Authenticated)*  
+Captures student or faculty review, rating, usability, and suggestions. Input text is automatically sanitized against XSS.
+
+#### Request Body
+```json
+{
+  "name": "Prof. R. Sen",
+  "email": "faculty@university.edu",
+  "role": "Faculty Evaluator",
+  "category": "Overall Experience",
+  "overall_rating": 5,
+  "ease_of_use": 5,
+  "trust_safety": 5,
+  "recommend": "Definitely",
+  "feedback_text": "Excellent peer-to-peer verification and privacy architecture."
+}
+```
+
+#### Response (`201 Created`)
+```json
+{
+  "id": 1,
+  "user_id": null,
+  "name": "Prof. R. Sen",
+  "email": "faculty@university.edu",
+  "role": "Faculty Evaluator",
+  "category": "Overall Experience",
+  "overall_rating": 5,
+  "ease_of_use": 5,
+  "trust_safety": 5,
+  "recommend": "Definitely",
+  "feedback_text": "Excellent peer-to-peer verification and privacy architecture.",
+  "created_at": "2026-10-06T15:00:00"
+}
+```
+
+---
+
+### 6.2 Retrieve Evaluation Statistics
+`GET /api/feedback/stats` *(Public)*  
+Returns aggregated statistics for academic review and grading.
+
+#### Response (`200 OK`)
+```json
+{
+  "total_feedbacks": 42,
+  "avg_overall_rating": 4.8,
+  "avg_ease_of_use": 4.9,
+  "avg_trust_safety": 4.9,
+  "recommend_breakdown": {
+    "Definitely": 35,
+    "Likely": 7
+  },
+  "roles_breakdown": {
+    "Student": 30,
+    "Faculty Evaluator": 12
+  }
+}
+```
+
+---
+
+### 6.3 List Submitted Evaluations
+`GET /api/feedback?role=Faculty%20Evaluator&limit=20` *(Public)*  
+Returns paginated list of evaluation submissions.
+
+---
+
+## 7. HTTP Cyber Defense Security Headers
+Every HTTP response returns mandatory security headers configured in middleware:
+- `X-Content-Type-Options: nosniff` (Prevents MIME-sniffing)
+- `X-Frame-Options: DENY` (Prevents Clickjacking)
+- `X-XSS-Protection: 1; mode=block` (Browser XSS filter)
+- `Referrer-Policy: strict-origin-when-cross-origin` (Privacy enforcement)
+- `Permissions-Policy: camera=(), microphone=(), geolocation=()` (Sensor restriction)
+
+---
+
+## 8. Sample cURL Workflow
 
 ```bash
-# 1. Send OTP
+# 1. Send OTP (Throttled to 5 req/min)
 curl -X POST http://localhost:8000/api/auth/send-otp \
   -H "Content-Type: application/json" \
   -d '{"phone_number": "+919876543210"}'
@@ -356,4 +490,16 @@ curl -X POST http://localhost:8000/api/users/onboard \
 
 # 4. View Sanitized Public Profile
 curl -X GET http://localhost:8000/api/u/aarav
+
+# 5. Submit Faculty / Peer Evaluation
+curl -X POST http://localhost:8000/api/feedback \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Academic Reviewer",
+    "role": "Faculty Evaluator",
+    "category": "Overall Experience",
+    "overall_rating": 5,
+    "feedback_text": "Verified security headers, PIN rate limiting, and dual handshake protocol."
+  }'
 ```
+

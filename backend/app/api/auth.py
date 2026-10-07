@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import create_access_token
+from app.core.sanitization import check_endpoint_rate_limit
 from app.models.user import User
 from app.schemas.user import SendOTPIn, VerifyOTPIn, TokenOut, UserOut
 
@@ -15,6 +16,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 def send_otp(payload: SendOTPIn):
     """
     Initiates phone login by sending a 6-digit OTP.
+    Throttled to max 5 requests per 60 seconds per phone number.
     For development and testing, mock OTP is '123456'.
     """
     clean_phone = payload.phone_number.strip().replace(" ", "").replace("-", "")
@@ -23,6 +25,10 @@ def send_otp(payload: SendOTPIn):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Please provide a valid phone number with country code."
         )
+
+    # Prevent SMS bombing / OTP spamming
+    check_rate_limit_key = f"otp_send_{clean_phone}"
+    check_endpoint_rate_limit(check_rate_limit_key, max_requests=5, window_seconds=60, action="OTP requests")
 
     # In production, integrate SMS provider (e.g. Twilio or Fast2SMS) here.
     logger.info("Mock OTP for phone %s is %s", clean_phone, settings.DEV_MOCK_OTP)
@@ -40,6 +46,9 @@ def verify_otp(payload: VerifyOTPIn, db: Session = Depends(get_db)):
     """
     clean_phone = payload.phone_number.strip().replace(" ", "").replace("-", "")
     code = payload.otp_code.strip()
+
+    # Rate limit verification attempts to prevent brute force
+    check_endpoint_rate_limit(f"otp_verify_{clean_phone}", max_requests=5, window_seconds=120, action="verification attempts")
 
     # Validate against configured mock OTP (default 123456)
     if code != settings.DEV_MOCK_OTP and code != "123456":

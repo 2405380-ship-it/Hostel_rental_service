@@ -81,6 +81,7 @@ sequenceDiagram
 
 #### Invariants & Security Rules:
 - **PIN Isolation**: The `handover_pin` is stored in the database but **only serialized in responses to the Lender**. The Borrower's API response has `handover_pin = null`.
+- **Anti-Brute-Force Rate Limiting**: The verification endpoint is protected by an in-memory sliding-window limiter (`verify_pin_rate_limit`). If an attacker exceeds **5 failed attempts**, the rental is locked for **300 seconds** (`429 Too Many Requests`).
 - **Physical Proximity Assurance**: The borrower cannot obtain the PIN without physically meeting the lender and inspecting the item in person.
 - **Atomic Activation**: The transition to `ACTIVE` marks the exact legal custody transfer.
 
@@ -116,6 +117,7 @@ sequenceDiagram
 
 #### Invariants & Security Rules:
 - **Role Inversion**: During return, the direction of trust inverts. The Borrower holds the secret `return_pin`. The Lender must enter it to acknowledge receipt of the undamaged item.
+- **Anti-Brute-Force Rate Limiting**: Throttled to a maximum of **5 failed attempts** before triggering a **300-second lockout** (`429 Too Many Requests`).
 - **Automatic Item Relisting**: Item availability is automatically restored from `'rented'` to `'available'`.
 - **Chat Retention Clock Starts**: The chat room's `expires_at` is stamped with $\text{now} + 24\text{ hours}$.
 

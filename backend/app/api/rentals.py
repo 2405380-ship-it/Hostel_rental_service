@@ -6,6 +6,12 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.security import get_current_user
+from app.core.sanitization import (
+    sanitize_text,
+    verify_pin_rate_limit,
+    record_failed_pin_attempt,
+    clear_pin_rate_limit
+)
 from app.models.rental import RentalRequest
 from app.models.item import Item
 from app.models.user import User
@@ -15,6 +21,7 @@ from app.schemas.rental import (
     RentalCreateIn, HandshakeVerifyIn, ReviewCreateIn, ReviewOut, RentalOut, ItemBasicOut
 )
 from app.schemas.user import UserBasicOut
+
 
 router = APIRouter(prefix="/rentals", tags=["Rental State Machine & Handshakes"])
 
@@ -206,8 +213,15 @@ def verify_handover(
     if rental.status != "ACCEPTED":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Cannot perform handover in '{rental.status}' state.")
 
+    # Enforce brute-force attack prevention
+    verify_pin_rate_limit(rental_id, current_user.id)
+
     if payload.pin.strip() != rental.handover_pin:
+        record_failed_pin_attempt(rental_id, current_user.id)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Handover PIN. Ask lender for the 4-digit code.")
+
+    # Successful PIN: clear rate limiter
+    clear_pin_rate_limit(rental_id, current_user.id)
 
     # Transition to ACTIVE
     rental.status = "ACTIVE"
@@ -241,12 +255,20 @@ def verify_return(
     if rental.status != "ACTIVE":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Cannot verify return in '{rental.status}' state.")
 
+    # Enforce brute-force attack prevention
+    verify_pin_rate_limit(rental_id, current_user.id)
+
     if payload.pin.strip() != rental.return_pin:
+        record_failed_pin_attempt(rental_id, current_user.id)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Return PIN. Ask borrower for the return code.")
+
+    # Successful PIN: clear rate limiter
+    clear_pin_rate_limit(rental_id, current_user.id)
 
     now = datetime.utcnow()
     rental.status = "RETURNED"
     rental.returned_at = now
+
 
     # Restore item availability
     if rental.item:
@@ -329,9 +351,10 @@ def submit_review(
         reviewer_id=current_user.id,
         reviewee_id=reviewee_id,
         rating=payload.rating,
-        comment=payload.comment.strip() if payload.comment else ""
+        comment=sanitize_text(payload.comment) if payload.comment else ""
     )
     db.add(review)
+
 
     # Recalculate reviewee's overall trust score
     all_reviews = db.query(Review).filter(Review.reviewee_id == reviewee_id).all()

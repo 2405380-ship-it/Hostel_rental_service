@@ -5,8 +5,10 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.security import get_current_user, upload_media_file
+from app.core.sanitization import sanitize_text, sanitize_url
 from app.models.user import User
 from app.models.item import Item
+
 from app.schemas.user import (
     UserOut, PublicProfileOut, UserOnboardIn, UserUpdateIn,
     ItemSummaryOut, USERNAME_REGEX
@@ -50,11 +52,11 @@ def onboard_user(
             detail=f"Username @{clean_username} is already taken by another student."
         )
 
-    current_user.display_name = payload.display_name.strip()
+    current_user.display_name = sanitize_text(payload.display_name)
     current_user.username = clean_username
-    current_user.hostel_block = payload.hostel_block.strip()
+    current_user.hostel_block = sanitize_text(payload.hostel_block)
     if payload.avatar_url:
-        current_user.avatar_url = payload.avatar_url.strip()
+        current_user.avatar_url = sanitize_url(payload.avatar_url)
     current_user.is_onboarded = True
 
     db.commit()
@@ -69,15 +71,16 @@ def update_profile(
 ):
     """Updates editable profile fields (display name, hostel wing, avatar)."""
     if payload.display_name is not None:
-        current_user.display_name = payload.display_name.strip()
+        current_user.display_name = sanitize_text(payload.display_name)
     if payload.hostel_block is not None:
-        current_user.hostel_block = payload.hostel_block.strip()
+        current_user.hostel_block = sanitize_text(payload.hostel_block)
     if payload.avatar_url is not None:
-        current_user.avatar_url = payload.avatar_url.strip()
+        current_user.avatar_url = sanitize_url(payload.avatar_url)
 
     db.commit()
     db.refresh(current_user)
     return current_user
+
 
 @router.post("/users/upload-avatar")
 async def upload_avatar(

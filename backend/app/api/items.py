@@ -6,7 +6,9 @@ from sqlalchemy import or_
 
 from app.core.database import get_db
 from app.core.security import get_current_user, upload_media_file, get_optional_user
+from app.core.sanitization import sanitize_text, sanitize_url
 from app.models.item import Item
+
 from app.models.user import User
 from app.schemas.item import ItemCreateIn, ItemUpdateIn, ItemOut, VALID_CATEGORIES
 from app.schemas.user import UserBasicOut
@@ -103,12 +105,12 @@ def create_item(
 
     new_item = Item(
         lender_id=current_user.id,
-        title=payload.title.strip(),
-        description=payload.description.strip() if payload.description else "",
+        title=sanitize_text(payload.title),
+        description=sanitize_text(payload.description) if payload.description else "",
         category=cat_match,
         daily_rate=max(0.0, float(payload.daily_rate)),
         status="available",
-        image_url=payload.image_url
+        image_url=sanitize_url(payload.image_url) if payload.image_url else None
     )
     db.add(new_item)
     db.commit()
@@ -152,9 +154,9 @@ def update_item(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not own this listing.")
 
     if payload.title is not None:
-        item.title = payload.title.strip()
+        item.title = sanitize_text(payload.title)
     if payload.description is not None:
-        item.description = payload.description.strip()
+        item.description = sanitize_text(payload.description)
     if payload.category is not None:
         cat_match = next((c for c in VALID_CATEGORIES if c.lower() == payload.category.lower()), None)
         if cat_match:
@@ -165,11 +167,12 @@ def update_item(
         if payload.status in ["available", "rented", "hidden"]:
             item.status = payload.status
     if payload.image_url is not None:
-        item.image_url = payload.image_url
+        item.image_url = sanitize_url(payload.image_url)
 
     db.commit()
     db.refresh(item)
     return format_item_out(item)
+
 
 @router.delete("/{item_id}")
 def delete_item(

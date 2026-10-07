@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     # CORS
     ALLOWED_ORIGINS: str = "*"
+    ALLOWED_ORIGIN_REGEX: str = r"https://.*\.vercel\.app"
 
     # Supabase Storage Configuration
     SUPABASE_URL: str = ""

@@ -63,11 +63,20 @@ def strip_exif(image_bytes: bytes, max_dimension: int = 1600) -> tuple[bytes, st
     image.save(output, format=fmt, quality=88, optimize=True)
     return output.getvalue(), ext
 
+MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024  # 5 MB safety limit
+
 def upload_media_file(file_bytes: bytes, folder: str = "items") -> str:
     """
     Cleans EXIF and uploads to Supabase Storage if configured;
     falls back to local filesystem static serving.
+    Enforces 5MB maximum file size defense against DoS memory attacks.
     """
+    if len(file_bytes) > MAX_UPLOAD_SIZE_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"Image exceeds the 5MB maximum allowable limit (size: {len(file_bytes) // 1024} KB)."
+        )
+
     clean_bytes, ext = strip_exif(file_bytes)
     file_id = f"{uuid.uuid4().hex}.{ext}"
     sub_path = f"{folder}/{file_id}"
@@ -89,7 +98,12 @@ def upload_media_file(file_bytes: bytes, folder: str = "items") -> str:
             logger.info("Successfully uploaded image to Supabase Storage: %s", public_url)
             return public_url
         except Exception as e:
-            logger.warning("Supabase storage upload failed (%s). Falling back to local storage.", e)
+            logger.warning(
+                "Supabase storage upload failed (%s). "
+                "Ensure bucket '%s' exists, is Public, and backend uses SUPABASE service_role key or has RLS INSERT policy. "
+                "Falling back to local storage.",
+                e, settings.SUPABASE_BUCKET
+            )
 
     # Local fallback
     upload_dir = os.path.join("uploads", folder)

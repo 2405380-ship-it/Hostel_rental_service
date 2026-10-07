@@ -1,2 +1,14 @@
 .env
 node_modules
+dist/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+uploads/
+*.rar
+.DS_Store
+
+package-lock.json

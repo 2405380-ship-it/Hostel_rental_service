@@ -2,15 +2,10 @@ import axios from 'axios';
 
 export function getApiBaseUrl() {
   const envUrl = import.meta.env.VITE_API_BASE_URL;
-  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
-    return envUrl.replace(/\/+$/, '');
+  if (envUrl && envUrl.trim()) {
+    return envUrl.trim().replace(/\/+$/, '');
   }
-  // When accessed from a phone or other device on local LAN (e.g. http://10.21.35.244:5173),
-  // automatically point API to the host device IP on port 8000
-  if (typeof window !== 'undefined' && window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && window.location.hostname !== '0.0.0.0') {
-    return `http://${window.location.hostname}:8000`;
-  }
-  return (envUrl || 'http://localhost:8000').replace(/\/+$/, '');
+  return 'http://localhost:8000';
 }
 
 export const API_BASE_URL = getApiBaseUrl();
@@ -46,14 +41,24 @@ apiClient.interceptors.response.use(
   }
 );
 
-// Helper to format image URLs
+// Helper to format and sanitize image URLs against XSS
 export function resolveImageUrl(url) {
-  if (!url) return null;
-  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
-    return url;
+  if (!url || typeof url !== 'string') return null;
+  const trimmed = url.trim();
+  const lower = trimmed.toLowerCase();
+  // Defend against URI scheme attacks (e.g. javascript:, vbscript:, data:text/html)
+  if (lower.startsWith('javascript:') || lower.startsWith('vbscript:') || lower.startsWith('data:text/html')) {
+    return null;
   }
-  return `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+  if (lower.startsWith('http://') || lower.startsWith('https://') || lower.startsWith('data:image/')) {
+    return trimmed;
+  }
+  if (trimmed.startsWith('/uploads/') || trimmed.startsWith('/')) {
+    return `${API_BASE_URL}${trimmed}`;
+  }
+  return `${API_BASE_URL}/${trimmed}`;
 }
+
 
 export const api = {
   // Auth
@@ -100,6 +105,12 @@ export const api = {
   getChat: (rentalId) => apiClient.get(`/chat/${rentalId}`),
   sendMessage: (rentalId, content) => apiClient.post(`/chat/${rentalId}/messages`, { content }),
   toggleSharePhone: (rentalId) => apiClient.post(`/chat/${rentalId}/share-phone`),
+
+  // Campus Project & Faculty Feedback
+  submitFeedback: (data) => apiClient.post('/feedback', data),
+  getFeedbackStats: () => apiClient.get('/feedback/stats'),
+  getFeedbacks: (params) => apiClient.get('/feedback', { params }),
 };
+
 
 export default api;

@@ -26,22 +26,40 @@ app = FastAPI(
     description="Campus Peer-to-Peer Rental and Utility-Sharing MVP API"
 )
 
-# Configure CORS for local LAN testing & web app
+# Configure CORS for web app and deployment
 cors_origins = settings.cors_origins
 logger.info("Configured CORS Allowed Origins: %s", cors_origins)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins if cors_origins != ["*"] else ["*"],
+    allow_origin_regex=settings.ALLOWED_ORIGIN_REGEX if settings.ALLOWED_ORIGIN_REGEX else None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Comprehensive HTTP Cyber Defense & Security Headers Middleware
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    response = await call_next(request)
+    # Prevent MIME type sniffing attacks
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    # Prevent Clickjacking by disallowing embedding in iframes
+    response.headers["X-Frame-Options"] = "DENY"
+    # Enable browser XSS filtering
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    # Enforce strict referrer privacy
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    # Disallow unauthorized hardware sensor access
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    return response
 
 # Ensure local upload directories exist and mount static serving for local fallback
 uploads_dir = os.path.join(os.getcwd(), "uploads")
 os.makedirs(os.path.join(uploads_dir, "avatars"), exist_ok=True)
 os.makedirs(os.path.join(uploads_dir, "items"), exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+
 
 # Include top-level API router under /api
 app.include_router(api_router, prefix=settings.API_V1_STR)
