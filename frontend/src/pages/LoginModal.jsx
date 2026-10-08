@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Phone, Mail, KeyRound, ShieldCheck, Sparkles, User, Building, AlertCircle } from 'lucide-react';
+import { X, Phone, Mail, KeyRound, ShieldCheck, User, Building, AlertCircle } from 'lucide-react';
 import { api } from '../services/api';
 
 const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,20}$/;
@@ -10,7 +10,6 @@ export default function LoginModal({ isOpen, onClose, onAuthSuccess }) {
   const [otpCode, setOtpCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [devOtpHint, setDevOtpHint] = useState(null);
 
   // Onboarding state
   const [displayName, setDisplayName] = useState('');
@@ -37,8 +36,7 @@ export default function LoginModal({ isOpen, onClose, onAuthSuccess }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.sendOtp(trimmed);
-      setDevOtpHint(res.data.dev_mock_otp || '123456');
+      await api.sendOtp(trimmed);
       setStep('otp');
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to send OTP code.');
@@ -70,7 +68,7 @@ export default function LoginModal({ isOpen, onClose, onAuthSuccess }) {
         onClose();
       }
     } catch (err) {
-      setError(err.response?.data?.detail || 'Invalid OTP code. For test environment use 123456.');
+      setError(err.response?.data?.detail || 'Invalid or expired OTP code. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -102,10 +100,6 @@ export default function LoginModal({ isOpen, onClose, onAuthSuccess }) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const fillDemoOtp = () => {
-    setOtpCode('123456');
   };
 
   return (
@@ -174,12 +168,6 @@ export default function LoginModal({ isOpen, onClose, onAuthSuccess }) {
             >
               {loading ? 'Sending OTP...' : 'Send Verification Code'}
             </button>
-
-            <div className="text-center">
-              <span className="text-[11px] font-mono text-zinc-500">
-                Dev mock OTP: <strong className="text-zinc-900 underline font-bold">123456</strong>
-              </span>
-            </div>
           </form>
         )}
 
@@ -187,17 +175,10 @@ export default function LoginModal({ isOpen, onClose, onAuthSuccess }) {
         {step === 'otp' && (
           <form onSubmit={handleVerifyOtp} className="space-y-4">
             <div>
-              <div className="flex items-center justify-between mb-1.5">
+              <div className="mb-1.5">
                 <label className="text-xs font-bold text-zinc-800">
-                  6-Digit OTP Code
+                  6-Digit Verification Code
                 </label>
-                <button
-                  type="button"
-                  onClick={fillDemoOtp}
-                  className="text-[11px] font-mono text-zinc-700 hover:text-zinc-950 font-bold flex items-center gap-1"
-                >
-                  <Sparkles className="w-3 h-3 text-lime-500" /> Auto-fill Demo (123456)
-                </button>
               </div>
 
               <div className="relative">
@@ -209,8 +190,8 @@ export default function LoginModal({ isOpen, onClose, onAuthSuccess }) {
                   maxLength={6}
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value)}
-                  placeholder="123456"
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl pl-10 pr-4 py-2.5 text-sm font-mono tracking-widest text-zinc-950 font-bold focus:outline-none focus:ring-1 focus:ring-zinc-950"
+                  placeholder="••••••"
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl pl-10 pr-4 py-2.5 text-sm font-mono tracking-widest text-zinc-950 font-bold focus:outline-none focus:ring-1 focus:ring-zinc-950 text-center"
                   required
                   autoFocus
                 />
