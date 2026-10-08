@@ -28,7 +28,9 @@ services:
         value: hostelshare-media
       - key: DEV_MOCK_OTP
         value: "123456"
-      - key: RESEND_API_KEY
-        sync: false # Set in Render Dashboard with your Resend API Key (re_...)
-      - key: EMAILS_FROM
-        value: "HostelShare <onboarding@resend.dev>"
+      - key: BREVO_API_KEY
+        sync: false # Set in Render Dashboard with your Brevo API Key (xkeysib-...)
+      - key: BREVO_SENDER_EMAIL
+        sync: false # Set in Render Dashboard with your verified sender email (e.g. yourname@gmail.com)
+      - key: BREVO_SENDER_NAME
+        value: "HostelShare"

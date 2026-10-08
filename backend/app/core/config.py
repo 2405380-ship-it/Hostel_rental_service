@@ -27,9 +27,10 @@ class Settings(BaseSettings):
     SUPABASE_KEY: str = ""
     SUPABASE_BUCKET: str = "hostelshare-media"
 
-    # Resend Email Configuration
-    RESEND_API_KEY: str = ""
-    EMAILS_FROM: str = "HostelShare <onboarding@resend.dev>"
+    # Brevo (Sendinblue) Email Configuration
+    BREVO_API_KEY: str = ""
+    BREVO_SENDER_EMAIL: str = ""
+    BREVO_SENDER_NAME: str = "HostelShare"
 
     # Server settings
     HOST: str = "0.0.0.0"

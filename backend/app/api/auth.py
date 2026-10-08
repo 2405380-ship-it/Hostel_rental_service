@@ -49,14 +49,15 @@ def send_otp(payload: SendOTPIn):
 
     if is_email:
         # Generate random 6-digit code or fallback to mock in local dev
-        otp_code = f"{random.randint(100000, 999999)}" if settings.RESEND_API_KEY else settings.DEV_MOCK_OTP
+        has_email_service = bool(settings.BREVO_API_KEY and settings.BREVO_SENDER_EMAIL)
+        otp_code = f"{random.randint(100000, 999999)}" if has_email_service else settings.DEV_MOCK_OTP
         _ACTIVE_EMAIL_OTPS[clean_id] = (otp_code, time.time() + 600)  # 10 minutes expiry
         send_otp_email(clean_id, otp_code)
         logger.info("Dispatched verification OTP to email %s", clean_id)
         return {
             "success": True,
             "message": f"Verification code sent to {clean_id}",
-            "dev_mock_otp": otp_code if not settings.RESEND_API_KEY else None
+            "dev_mock_otp": otp_code if not has_email_service else None
         }
 
     # Phone flow (mock for local dev, SMS provider in production)

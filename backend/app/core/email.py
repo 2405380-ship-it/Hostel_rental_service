@@ -5,7 +5,7 @@ from app.core.config import settings
 
 logger = logging.getLogger("hostelshare.email")
 
-RESEND_API_ENDPOINT = "https://api.resend.com/emails"
+BREVO_API_ENDPOINT = "https://api.brevo.com/v3/smtp/email"
 
 def send_email(
     to: str,
@@ -14,56 +14,64 @@ def send_email(
     text_content: Optional[str] = None
 ) -> bool:
     """
-    Dispatches transactional email via Resend REST API.
-    If RESEND_API_KEY is not configured or in dev mode, gracefully logs to console.
+    Dispatches transactional email via Brevo (Sendinblue) REST API (Port 443).
+    If BREVO_API_KEY or BREVO_SENDER_EMAIL is not configured, gracefully logs to console for local dev.
     """
-    api_key = settings.RESEND_API_KEY.strip() if settings.RESEND_API_KEY else ""
+    api_key = settings.BREVO_API_KEY.strip() if settings.BREVO_API_KEY else ""
+    sender_email = settings.BREVO_SENDER_EMAIL.strip() if settings.BREVO_SENDER_EMAIL else ""
+    sender_name = settings.BREVO_SENDER_NAME.strip() if settings.BREVO_SENDER_NAME else "HostelShare"
 
-    if not api_key:
+    if not api_key or not sender_email:
         logger.info(
-            "[DEV MODE] Email to <%s> not dispatched via API (RESEND_API_KEY not configured). Subject: '%s'",
+            "[DEV MODE] Email to <%s> not dispatched via Brevo (BREVO_API_KEY or BREVO_SENDER_EMAIL not configured). Subject: '%s'",
             to, subject
         )
         return True
 
     headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
+        "accept": "application/json",
+        "api-key": api_key,
+        "content-type": "application/json"
     }
 
     payload = {
-        "from": settings.EMAILS_FROM,
-        "to": [to],
+        "sender": {
+            "name": sender_name,
+            "email": sender_email
+        },
+        "to": [
+            {"email": to}
+        ],
         "subject": subject,
-        "html": html_content,
+        "htmlContent": html_content
     }
     if text_content:
-        payload["text"] = text_content
+        payload["textContent"] = text_content
 
     try:
         response = requests.post(
-            RESEND_API_ENDPOINT,
+            BREVO_API_ENDPOINT,
             headers=headers,
             json=payload,
             timeout=8
         )
         if response.status_code in (200, 201):
-            logger.info("Email successfully dispatched via Resend to <%s>. ID: %s", to, response.json().get("id"))
+            logger.info("Email successfully dispatched via Brevo to <%s>. MessageId: %s", to, response.json().get("messageId"))
             return True
         else:
             logger.warning(
-                "Resend API error (%s): %s. Fallback logged.",
+                "Brevo API error (%s): %s. Fallback logged.",
                 response.status_code, response.text
             )
             return False
     except Exception as e:
-        logger.error("Failed to connect to Resend API: %s", e)
+        logger.error("Failed to connect to Brevo API: %s", e)
         return False
 
 
 def send_otp_email(to_email: str, otp_code: str) -> bool:
     """
-    Sends campus authentication OTP code via Resend.
+    Sends campus authentication OTP code via Brevo.
     """
     subject = f"Your HostelShare Verification Code: {otp_code}"
     
