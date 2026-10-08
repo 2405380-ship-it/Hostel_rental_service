@@ -58,8 +58,8 @@ erDiagram
         int lender_id FK "References USERS.id (CASCADE)"
         int borrower_id FK "References USERS.id (CASCADE)"
         string status "PENDING, ACCEPTED, ACTIVE, RETURNED, COMPLETED, CANCELLED"
-        string handover_pin "4-digit PIN for Lender"
-        string return_pin "4-digit PIN for Borrower"
+        string handover_pin "6-digit PIN for Lender"
+        string return_pin "6-digit PIN for Borrower"
         datetime start_date "Borrow start timestamp"
         datetime end_date "Borrow return timestamp"
         float total_price "Computed rental charge"
@@ -165,8 +165,8 @@ Governs the core transactional state machine and stores handshake verification P
 | `lender_id` | `INTEGER` | `FOREIGN KEY (users.id) ON DELETE CASCADE` | — | Lending student. |
 | `borrower_id` | `INTEGER` | `FOREIGN KEY (users.id) ON DELETE CASCADE` | — | Borrowing student. |
 | `status` | `VARCHAR(20)` | `NOT NULL`, `INDEX` | `'PENDING'` | `PENDING`, `ACCEPTED`, `ACTIVE`, `RETURNED`, `COMPLETED`, `CANCELLED`. |
-| `handover_pin` | `VARCHAR(10)` | `NULLABLE` | `NULL` | 4-digit secret PIN given to Lender to confirm handover. |
-| `return_pin` | `VARCHAR(10)` | `NULLABLE` | `NULL` | 4-digit secret PIN given to Borrower to confirm return. |
+| `handover_pin` | `VARCHAR(10)` | `NULLABLE` | `NULL` | 6-digit secret PIN given to Lender to confirm handover. |
+| `return_pin` | `VARCHAR(10)` | `NULLABLE` | `NULL` | 6-digit secret PIN given to Borrower to confirm return. |
 | `start_date` | `TIMESTAMP` | `NULLABLE` | `NULL` | Scheduled borrow start date. |
 | `end_date` | `TIMESTAMP` | `NULLABLE` | `NULL` | Scheduled return date. |
 | `total_price` | `FLOAT` | `NOT NULL` | `0.0` | Total calculated fee (`days * daily_rate`). |

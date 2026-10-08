@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  ShieldCheck, 
-  Star, 
-  Tag, 
-  Repeat, 
-  Trash2 
+import {
+  ArrowLeft,
+  ShieldCheck,
+  Star,
+  Tag,
+  Repeat,
+  Trash2
 } from 'lucide-react';
 import { api, resolveImageUrl } from '../services/api';
 
@@ -102,7 +102,7 @@ export default function ItemDetail({ user, onOpenLogin }) {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      
+
       {/* Back button */}
       <button
         onClick={() => navigate(-1)}
@@ -112,7 +112,7 @@ export default function ItemDetail({ user, onOpenLogin }) {
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
+
         {/* Left Column: Image & Details */}
         <div className="lg:col-span-7 space-y-5">
           <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-zinc-100 border border-zinc-200 relative shadow-2xs">
@@ -138,11 +138,10 @@ export default function ItemDetail({ user, onOpenLogin }) {
 
             {/* Status tag */}
             <div className="absolute top-3 right-3">
-              <span className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border shadow-xs ${
-                item.status === 'available'
+              <span className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border shadow-xs ${item.status === 'available'
                   ? 'bg-lime-50 text-lime-950 border-lime-300'
                   : 'bg-zinc-100 text-zinc-700 border-zinc-300'
-              }`}>
+                }`}>
                 {item.status === 'available' ? 'Available' : 'In Use'}
               </span>
             </div>
@@ -151,7 +150,7 @@ export default function ItemDetail({ user, onOpenLogin }) {
           {/* Description Section */}
           <div className="bg-white p-6 rounded-2xl border border-zinc-200 space-y-3.5 shadow-2xs">
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950">{item.title}</h1>
-            
+
             <div className="pt-2 border-t border-zinc-100">
               <h2 className="text-[10px] uppercase font-mono font-bold tracking-widest text-zinc-400 mb-1.5">
                 Item Description
@@ -167,7 +166,7 @@ export default function ItemDetail({ user, onOpenLogin }) {
               <div className="text-xs text-zinc-600 space-y-0.5">
                 <p className="font-bold text-zinc-900">Dual-Handshake Protocol</p>
                 <p className="text-zinc-500 text-[11px] leading-relaxed">
-                  Both handover and safe return are confirmed via random 4-digit PIN verification. Contact numbers stay masked until mutual agreement in chat.
+                  Both handover and safe return are confirmed via random 6-digit PIN verification. Contact numbers stay masked until mutual agreement in chat.
                 </p>
               </div>
             </div>
@@ -176,7 +175,7 @@ export default function ItemDetail({ user, onOpenLogin }) {
 
         {/* Right Column: Pricing, Lender Profile & Request Box */}
         <div className="lg:col-span-5 space-y-5">
-          
+
           {/* Rate Card */}
           <div className="bg-white p-6 rounded-2xl border border-zinc-200 space-y-4 shadow-2xs">
             <div className="flex items-baseline justify-between border-b border-zinc-100 pb-3">
@@ -202,9 +201,9 @@ export default function ItemDetail({ user, onOpenLogin }) {
               <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-between">
                 <Link to={`/u/${item.lender.username}`} className="flex items-center gap-2.5 group">
                   {item.lender.avatar_url ? (
-                    <img 
-                      src={resolveImageUrl(item.lender.avatar_url)} 
-                      alt={item.lender.display_name} 
+                    <img
+                      src={resolveImageUrl(item.lender.avatar_url)}
+                      alt={item.lender.display_name}
                       className="w-8 h-8 rounded-lg object-cover ring-1 ring-zinc-200"
                     />
                   ) : (

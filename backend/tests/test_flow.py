@@ -86,7 +86,7 @@ def test_full_rental_lifecycle_and_privacy_shield():
     assert rental_accepted["status"] == "ACCEPTED"
     handover_pin = rental_accepted["handover_pin"]
     assert handover_pin is not None
-    assert len(handover_pin) == 4
+    assert len(handover_pin) == 6
 
     # Check Borrower view: Handover PIN is masked/null for borrower!
     r = client.get(f"/api/rentals/{rental_id}", headers=borrower_headers)
@@ -121,7 +121,7 @@ def test_full_rental_lifecycle_and_privacy_shield():
 
     # 8. Borrower enters Handover PIN -> transitions to ACTIVE
     # Test wrong PIN first:
-    r = client.post(f"/api/rentals/{rental_id}/verify-handover", headers=borrower_headers, json={"pin": "0000"})
+    r = client.post(f"/api/rentals/{rental_id}/verify-handover", headers=borrower_headers, json={"pin": "000000"})
     assert r.status_code == 400
 
     # Submit correct PIN:

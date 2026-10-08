@@ -14,7 +14,7 @@ High-performance, mobile-responsive React web application built with Vite and Ta
   - One-tap mutual consent toggle reveals full contact details only when both parties click "Share Phone Number".
 - **Dual-Handshake State Machine UI**:
   - Live state tracking (`PENDING` $\to$ `ACCEPTED` $\to$ `ACTIVE` $\to$ `RETURNED` $\to$ `COMPLETED`).
-  - Interactive PIN modal for displaying secret 4-digit codes and submitting verification.
+  - Interactive PIN modal for displaying secret 6-digit codes and submitting verification.
 - **Peer Reviews & Campus Feedback**:
   - Interactive 1-to-5 star rating and feedback modal after item return.
   - Dedicated campus feedback system for students and faculty.

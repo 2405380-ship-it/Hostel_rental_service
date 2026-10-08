@@ -17,7 +17,7 @@ This Software Requirements Specification (SRS) establishes the complete function
 HostelShare addresses campus resource fragmentation where students own redundant single-use items (soldering irons, calculators, cycle pumps, iron presses, lab tools) while other students face temporary shortages. The platform solves this problem by providing:
 1. **Low-friction Phone OTP Authentication** with strict campus profile onboarding.
 2. **Mutual Privacy Shield Architecture** that prevents deanonymization and harassment by concealing student phone numbers and room/hostel wing locations from public view.
-3. **Dual-Handshake State Machine Protocol** using cryptographically generated 4-digit verification PINs to guarantee physical handover and return before states transition.
+3. **Dual-Handshake State Machine Protocol** using cryptographically generated 6-digit verification PINs to guarantee physical handover and return before states transition.
 4. **Ephemeral Deal-Bound Communications** with mutual consent contact reveals and automatic database purging after deal conclusion.
 5. **Decentralized Trust Scoring Engine** based on mandatory post-rental 1-5 star peer reviews.
 
@@ -27,8 +27,8 @@ HostelShare addresses campus resource fragmentation where students own redundant
 | **P2P** | Peer-to-Peer architecture where every user can be both consumer and supplier |
 | **Lender** | The student owning an item and offering it for rent or free borrow |
 | **Borrower** | The student requesting temporary custody and usage of an item |
-| **Handover Handshake**| Verification step where Borrower inputs Lender's secret 4-digit PIN |
-| **Return Handshake** | Verification step where Lender inputs Borrower's secret 4-digit PIN |
+| **Handover Handshake**| Verification step where Borrower inputs Lender's secret 6-digit PIN |
+| **Return Handshake** | Verification step where Lender inputs Borrower's secret 6-digit PIN |
 | **Mutual Consent Shield**| Privacy mechanism where raw phone numbers remain masked until both parties explicitly agree |
 | **Ephemeral Chat** | Message stream automatically flagged for deletion 24 hours after completion or 72 hours after cancellation |
 | **EXIF** | Exchangeable Image File Format metadata containing GPS coordinates, camera serials, and timestamps |
@@ -142,8 +142,8 @@ stateDiagram-v2
 
 ### 3.4 Functional Requirement 4 (FR-4): Dual-Handshake State Machine
 - **FR-4.1 (Request)**: A borrower creates a rental request with dates and optional note. Status is initialized to `PENDING`.
-- **FR-4.2 (Acceptance)**: The lender accepts the request. The system transitions status to `ACCEPTED`, provisions a 4-digit numeric Handover PIN (visible solely to the lender), marks the item `rented`, and opens the deal chat room.
-- **FR-4.3 (Handover)**: Upon physical meeting, the lender communicates the Handover PIN. The borrower submits the PIN via `/rentals/{id}/verify-handover`. The system verifies equality, sets status to `ACTIVE`, and provisions a secret 4-digit Return PIN (visible solely to the borrower).
+- **FR-4.2 (Acceptance)**: The lender accepts the request. The system transitions status to `ACCEPTED`, provisions a 6-digit numeric Handover PIN (visible solely to the lender), marks the item `rented`, and opens the deal chat room.
+- **FR-4.3 (Handover)**: Upon physical meeting, the lender communicates the Handover PIN. The borrower submits the PIN via `/rentals/{id}/verify-handover`. The system verifies equality, sets status to `ACTIVE`, and provisions a secret 6-digit Return PIN (visible solely to the borrower).
 - **FR-4.4 (Return)**: Upon return, the borrower communicates the Return PIN. The lender submits the PIN via `/rentals/{id}/verify-return`. The system verifies equality, sets status to `RETURNED`, restores item status to `available`, and schedules chat expiration for `now + 24 hours`.
 - **FR-4.5 (Cancellation)**: Either party can cancel a `PENDING` or `ACCEPTED` request. Status transitions to `CANCELLED`, item availability is restored, and chat expiration is scheduled for `now + 72 hours`.
 

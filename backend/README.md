@@ -10,8 +10,8 @@ High-performance, privacy-first REST API built with FastAPI, SQLAlchemy, and Sup
 - **Strict Privacy Shield**: Sanitized public profiles (`/u/:username`) completely strip phone numbers, room numbers, and hostel wings at the database serialization level.
 - **Dual-Handshake State Machine**:
   - `PENDING` $\to$ `ACCEPTED` $\to$ `ACTIVE` $\to$ `RETURNED` $\to$ `COMPLETED` (or `CANCELLED`).
-  - **Handover PIN**: 4-digit code provided to Lender, entered by Borrower to activate the rental.
-  - **Return PIN**: 4-digit code provided to Borrower, entered by Lender to mark the item returned.
+  - **Handover PIN**: 6-digit code provided to Lender, entered by Borrower to activate the rental.
+  - **Return PIN**: 6-digit code provided to Borrower, entered by Lender to mark the item returned.
   - **Brute-Force Rate Limiting**: Max 5 failed PIN attempts triggers a 300-second lockout.
   - **Mandatory Trust Reviews**: Post-return 1-5 star peer reviews recalculating trust scores.
 - **Mutual Privacy Shield In-App Chat**:

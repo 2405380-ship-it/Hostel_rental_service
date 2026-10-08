@@ -29,8 +29,8 @@ export default function HandshakeModal({
 
   const handleSubmitPin = async (e) => {
     e.preventDefault();
-    if (pinInput.trim().length !== 4) {
-      setError('Please enter a 4-digit PIN code.');
+    if (pinInput.trim().length !== 6) {
+      setError('Please enter a 6-digit PIN code.');
       return;
     }
 
@@ -46,7 +46,7 @@ export default function HandshakeModal({
       if (onSuccess) onSuccess(res.data);
       onClose();
     } catch (err) {
-      setError(err.response?.data?.detail || 'Verification failed. Please double check the 4-digit PIN.');
+      setError(err.response?.data?.detail || 'Verification failed. Please double check the 6-digit PIN.');
     } finally {
       setLoading(false);
     }
@@ -106,7 +106,7 @@ export default function HandshakeModal({
             <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-3.5 text-xs text-zinc-600 leading-relaxed flex items-start gap-2.5">
               <ShieldCheck className="w-4 h-4 text-zinc-700 shrink-0 mt-0.5" />
               <div>
-                <strong className="text-zinc-900">Safety Protocol:</strong> Inspect the item in person with your hostel peer. Share this 4-digit PIN verbally only once custody is verified.
+                <strong className="text-zinc-900">Safety Protocol:</strong> Inspect the item in person with your hostel peer. Share this 6-digit PIN verbally only once custody is verified.
               </div>
             </div>
 
@@ -121,7 +121,7 @@ export default function HandshakeModal({
           /* Mode B: PIN Verifier (Input Form) */
           <form onSubmit={handleSubmitPin} className="space-y-4">
             <p className="text-xs text-zinc-600 leading-relaxed">
-              Ask your hostel peer for their secret <strong>4-digit PIN</strong>. Once verified, the transaction status will immediately update.
+              Ask your hostel peer for their secret <strong>6-digit PIN</strong>. Once verified, the transaction status will immediately update.
             </p>
 
             {error && (
@@ -133,14 +133,14 @@ export default function HandshakeModal({
 
             <div>
               <label className="block text-xs font-bold text-zinc-800 mb-2">
-                Enter 4-Digit Handshake PIN
+                Enter 6-Digit Handshake PIN
               </label>
               <input
                 type="text"
-                maxLength={4}
+                maxLength={6}
                 value={pinInput}
                 onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))}
-                placeholder="5928"
+                placeholder="••••••"
                 className="w-full text-center font-mono text-3xl tracking-[0.3em] font-extrabold bg-zinc-50 border border-zinc-200 rounded-xl py-3 text-zinc-950 focus:outline-none focus:ring-1 focus:ring-zinc-950 placeholder:text-zinc-300"
                 autoFocus
               />
@@ -156,7 +156,7 @@ export default function HandshakeModal({
               </button>
               <button
                 type="submit"
-                disabled={loading || pinInput.length !== 4}
+                disabled={loading || pinInput.length !== 6}
                 className="w-2/3 py-2.5 rounded-xl bg-zinc-950 hover:bg-zinc-800 disabled:opacity-40 text-white text-xs font-semibold shadow-xs transition-all flex items-center justify-center gap-1.5"
               >
                 <KeyRound className="w-3.5 h-3.5 text-lime-400" />

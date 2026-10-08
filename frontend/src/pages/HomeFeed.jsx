@@ -47,7 +47,7 @@ export default function HomeFeed({ onOpenLogin, user }) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      
+
       {/* Hero Campus Banner - Gen-Z Minimal, No Emojis, No Gradients */}
       <div className="rounded-2xl p-6 sm:p-10 border border-zinc-200 bg-white shadow-2xs">
         <div className="max-w-2xl space-y-3">
@@ -55,13 +55,13 @@ export default function HomeFeed({ onOpenLogin, user }) {
             <span className="w-1.5 h-1.5 rounded-full bg-lime-500"></span>
             <span>Campus Utility Sharing</span>
           </div>
-          
+
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-950">
             Borrow utilities from peers in your hostel
           </h1>
 
           <p className="text-zinc-600 text-xs sm:text-sm leading-relaxed">
-            Scientific calculators, lab soldering kits, iron presses, cycle pumps. Verified handshakes via 4-digit PIN with mutual privacy shields.
+            Scientific calculators, lab soldering kits, iron presses, cycle pumps. Verified handshakes via 6-digit PIN with mutual privacy shields.
           </p>
 
           {/* Quick Search Bar */}
@@ -89,18 +89,17 @@ export default function HomeFeed({ onOpenLogin, user }) {
       {/* Filter Controls */}
       <div className="space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-2 border-b border-zinc-200">
-          
+
           {/* Categories */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setCategory(cat)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
-                  category === cat
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${category === cat
                     ? 'bg-zinc-950 text-white'
                     : 'bg-white text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50 border border-zinc-200'
-                }`}
+                  }`}
               >
                 {cat}
               </button>
@@ -112,11 +111,10 @@ export default function HomeFeed({ onOpenLogin, user }) {
             {/* Free vs All Toggle */}
             <button
               onClick={() => setFreeOnly(!freeOnly)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-                freeOnly 
-                  ? 'bg-lime-200 text-lime-950 border-lime-400' 
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${freeOnly
+                  ? 'bg-lime-200 text-lime-950 border-lime-400'
                   : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50'
-              }`}
+                }`}
             >
               Free Only (₹0)
             </button>

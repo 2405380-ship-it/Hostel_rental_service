@@ -42,7 +42,7 @@ def sanitize_url(url: Optional[str]) -> Optional[str]:
 
 def verify_pin_rate_limit(rental_id: int, user_id: int):
     """
-    Prevents brute-force attacks against 4-digit Handshake & Return PINs.
+    Prevents brute-force attacks against 6-digit Handshake & Return PINs.
     Locks attempts if max failed tries exceeded.
     """
     key = (rental_id, user_id)

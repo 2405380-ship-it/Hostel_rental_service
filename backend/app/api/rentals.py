@@ -26,8 +26,8 @@ from app.schemas.user import UserBasicOut
 router = APIRouter(prefix="/rentals", tags=["Rental State Machine & Handshakes"])
 
 def generate_pin() -> str:
-    """Generates a secure 4-digit numeric handshake PIN."""
-    return f"{random.randint(1000, 9999)}"
+    """Generates a secure 6-digit numeric handshake PIN."""
+    return f"{random.randint(100000, 999999)}"
 
 def format_rental_out(rental: RentalRequest, current_user_id: int) -> RentalOut:
     is_lender = rental.lender_id == current_user_id
@@ -157,7 +157,7 @@ def accept_rental(
 ):
     """
     Lender accepts rental request:
-    - Generates 4-digit Handover PIN for lender.
+    - Generates 6-digit Handover PIN for lender.
     - Transitions status PENDING -> ACCEPTED.
     - Creates dedicated Chat room for the deal.
     """
@@ -231,7 +231,7 @@ def verify_handover(
 
     if payload.pin.strip() != rental.handover_pin:
         record_failed_pin_attempt(rental_id, current_user.id)
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Handover PIN. Ask lender for the 4-digit code.")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect Handover PIN. Ask lender for the 6-digit code.")
 
     # Successful PIN: clear rate limiter
     clear_pin_rate_limit(rental_id, current_user.id)

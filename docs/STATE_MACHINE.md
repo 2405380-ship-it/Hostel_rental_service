@@ -35,9 +35,9 @@ stateDiagram-v2
     
     ACCEPTED --> CANCELLED: Either party cancels\n[Chat expires in 72h]\n[Item status = 'available']
     
-    ACCEPTED --> ACTIVE: Handover Handshake Verified\n(Borrower enters Lender's 4-digit PIN)\n[System generates Return PIN for Borrower]
+    ACCEPTED --> ACTIVE: Handover Handshake Verified\n(Borrower enters Lender's 6-digit PIN)\n[System generates Return PIN for Borrower]
     
-    ACTIVE --> RETURNED: Return Handshake Verified\n(Lender enters Borrower's 4-digit PIN)\n[Item status = 'available']\n[Chat expires in 24h]
+    ACTIVE --> RETURNED: Return Handshake Verified\n(Lender enters Borrower's 6-digit PIN)\n[Item status = 'available']\n[Chat expires in 24h]
     
     RETURNED --> COMPLETED: Review Protocol Satisfied\n(Both Lender & Borrower submit 1-5★)\n[Recalculate Trust Ratings]\n[Increment completed_rentals count]
     
@@ -60,19 +60,19 @@ sequenceDiagram
 
     Note over Borrower,Lender: Initial Status: PENDING
     Lender->>Server: POST /rentals/{id}/accept
-    Server->>Server: Generate Cryptographic 4-digit PIN (e.g., "7841")
+    Server->>Server: Generate Cryptographic 6-digit PIN (e.g., "784192")
     Server->>Server: Set status = ACCEPTED
-    Server-->>Lender: Return handover_pin: "7841"
+    Server-->>Lender: Return handover_pin: "784192"
     Server-->>Borrower: Notification: Deal Accepted (handover_pin is NULL)
 
     Note over Lender,Borrower: In-Person Physical Handover at Hostel
-    Lender->>Borrower: Inspects item and verbally communicates "7841"
-    Borrower->>Server: POST /rentals/{id}/verify-handover { pin: "7841" }
+    Lender->>Borrower: Inspects item and verbally communicates "784192"
+    Borrower->>Server: POST /rentals/{id}/verify-handover { pin: "784192" }
     
     alt PIN matches
         Server->>Server: Set status = ACTIVE
-        Server->>Server: Generate Cryptographic 4-digit Return PIN (e.g., "3194")
-        Server-->>Borrower: Return success (return_pin: "3194")
+        Server->>Server: Generate Cryptographic 6-digit Return PIN (e.g., "319485")
+        Server-->>Borrower: Return success (return_pin: "319485")
         Server-->>Lender: Notification: Item is now ACTIVE
     else PIN mismatch
         Server-->>Borrower: 400 Bad Request: Incorrect Handover PIN

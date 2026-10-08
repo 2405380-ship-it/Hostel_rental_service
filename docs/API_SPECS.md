@@ -260,14 +260,14 @@ Uploads listing photo: strips all camera/GPS EXIF metadata, enforces 5 MB ceilin
 
 ### 4.2 Accept Rental Request (Issues Handover PIN)
 `POST /api/rentals/{rental_id}/accept` *(Authenticated - Lender)*  
-Transitions state `PENDING` $\to$ `ACCEPTED`. Generates 4-digit `handover_pin` returned to Lender.
+Transitions state `PENDING` $\to$ `ACCEPTED`. Generates 6-digit `handover_pin` returned to Lender.
 
 #### Response (`200 OK`)
 ```json
 {
   "id": 101,
   "status": "ACCEPTED",
-  "handover_pin": "5928",
+  "handover_pin": "592812",
   "return_pin": null,
   "is_lender": true,
   "chat_id": 42
@@ -278,12 +278,12 @@ Transitions state `PENDING` $\to$ `ACCEPTED`. Generates 4-digit `handover_pin` r
 
 ### 4.3 Verify Handover PIN (Handover Handshake)
 `POST /api/rentals/{rental_id}/verify-handover` *(Authenticated - Borrower)*  
-Borrower enters Lender's 4-digit PIN upon physical item handover. Transitions state `ACCEPTED` $\to$ `ACTIVE`.
+Borrower enters Lender's 6-digit PIN upon physical item handover. Transitions state `ACCEPTED` $\to$ `ACTIVE`.
 
 #### Request Body
 ```json
 {
-  "pin": "5928"
+  "pin": "592812"
 }
 ```
 
@@ -293,25 +293,25 @@ Borrower enters Lender's 4-digit PIN upon physical item handover. Transitions st
   "id": 101,
   "status": "ACTIVE",
   "handover_pin": null,
-  "return_pin": "8412",
+  "return_pin": "841295",
   "is_borrower": true
 }
 ```
 
 #### Error Responses
-- `400 Bad Request`: `{"detail": "Incorrect Handover PIN. Ask lender for the 4-digit code."}`
+- `400 Bad Request`: `{"detail": "Incorrect Handover PIN. Ask lender for the 6-digit code."}`
 - `429 Too Many Requests`: `{"detail": "Too many failed PIN attempts. Verification is locked for 300 seconds to protect this rental."}`
 
 ---
 
 ### 4.4 Verify Return PIN (Return Handshake)
 `POST /api/rentals/{rental_id}/verify-return` *(Authenticated - Lender)*  
-Lender enters Borrower's 4-digit PIN upon receiving item back. Transitions state `ACTIVE` $\to$ `RETURNED`. Enforces brute-force rate limit (5 failed attempts max).
+Lender enters Borrower's 6-digit PIN upon receiving item back. Transitions state `ACTIVE` $\to$ `RETURNED`. Enforces brute-force rate limit (5 failed attempts max).
 
 #### Request Body
 ```json
 {
-  "pin": "8412"
+  "pin": "841295"
 }
 ```
 
@@ -325,7 +325,7 @@ Lender enters Borrower's 4-digit PIN upon receiving item back. Transitions state
 ```
 
 #### Error Responses
-- `400 Bad Request`: `{"detail": "Incorrect Return PIN. Ask borrower for the 4-digit code."}`
+- `400 Bad Request`: `{"detail": "Incorrect Return PIN. Ask borrower for the 6-digit code."}`
 - `429 Too Many Requests`: `{"detail": "Too many failed PIN attempts. Verification is locked for 300 seconds to protect this rental."}`
 
 ---

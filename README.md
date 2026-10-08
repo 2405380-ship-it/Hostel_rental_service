@@ -71,8 +71,8 @@ Hostel_rental_service/
 
 3. **Rental State Machine & Dual Handshake**:
    - `PENDING` $\to$ `ACCEPTED` $\to$ `ACTIVE` $\to$ `RETURNED` $\to$ `COMPLETED` (or `CANCELLED`).
-   - **Handover Handshake**: Lender receives secret 4-digit PIN upon acceptance. Borrower inputs PIN upon meeting to transition to `ACTIVE`.
-   - **Return Handshake**: Borrower receives secret 4-digit PIN during return. Lender inputs PIN upon inspecting item to transition to `RETURNED`.
+   - **Handover Handshake**: Lender receives secret 6-digit PIN upon acceptance. Borrower inputs PIN upon meeting to transition to `ACTIVE`.
+   - **Return Handshake**: Borrower receives secret 6-digit PIN during return. Lender inputs PIN upon inspecting item to transition to `RETURNED`.
    - **Trust Reviews**: Mandatory post-return 1-to-5 star ratings recalculating overall peer trust score.
 
 4. **In-App Chat & Mutual Privacy Shield**:

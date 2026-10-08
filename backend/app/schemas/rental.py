@@ -10,7 +10,7 @@ class RentalCreateIn(BaseModel):
     note: Optional[str] = None
 
 class HandshakeVerifyIn(BaseModel):
-    pin: str = Field(..., min_length=4, max_length=10)
+    pin: str = Field(..., min_length=6, max_length=10, example="592812")
 
 class ReviewCreateIn(BaseModel):
     rating: int = Field(..., ge=1, le=5)

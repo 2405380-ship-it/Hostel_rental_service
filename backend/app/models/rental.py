@@ -14,7 +14,7 @@ class RentalRequest(Base):
     # State Machine: PENDING -> ACCEPTED -> ACTIVE -> RETURNED -> COMPLETED (or CANCELLED)
     status = Column(String(20), default="PENDING", index=True)
     
-    # Dual Handshake PINs (random 4-digit codes)
+    # Dual Handshake PINs (random 6-digit codes)
     handover_pin = Column(String(10), nullable=True)  # Generated when accepted, given to lender, borrower enters to activate
     return_pin = Column(String(10), nullable=True)    # Given to borrower upon return initiation, lender enters to confirm return
     
