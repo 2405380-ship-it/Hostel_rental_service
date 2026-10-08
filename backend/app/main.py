@@ -105,11 +105,16 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/health", tags=["Health"])
 def health_check():
+    is_postgres = not str(engine.url).startswith("sqlite")
     return {
         "status": "healthy",
         "service": settings.PROJECT_NAME,
         "version": settings.VERSION,
-        "database": "connected"
+        "database": {
+            "type": "postgresql" if is_postgres else "sqlite",
+            "is_persistent": is_postgres,
+            "connected": True
+        }
     }
 
 if __name__ == "__main__":

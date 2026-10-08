@@ -1,4 +1,5 @@
 import os
+import urllib.parse
 from typing import List
 from pydantic_settings import BaseSettings
 
@@ -45,15 +46,40 @@ class Settings(BaseSettings):
     @property
     def effective_database_url(self) -> str:
         if self.DATABASE_URL and self.DATABASE_URL.strip():
-            url = self.DATABASE_URL.strip()
-            # Standardize postgres:// to postgresql+psycopg2:// if needed
+            url = self.DATABASE_URL.strip().strip("'\"")
+            
+            # Determine driver prefix
+            prefix = ""
+            rest = url
             if url.startswith("postgres://"):
-                url = url.replace("postgres://", "postgresql+psycopg2://", 1)
-            elif url.startswith("postgresql://") and not url.startswith("postgresql+psycopg2://"):
-                url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
-            return url
-        # Fallback to local SQLite for immediate execution if Supabase isn't configured yet
-        return "sqlite:///./hostelshare.db"
+                prefix = "postgresql+psycopg2://"
+                rest = url[len("postgres://"):]
+            elif url.startswith("postgresql://"):
+                prefix = "postgresql+psycopg2://"
+                rest = url[len("postgresql://"):]
+            elif url.startswith("postgresql+psycopg2://"):
+                prefix = "postgresql+psycopg2://"
+                rest = url[len("postgresql+psycopg2://"):]
+            elif url.startswith("sqlite"):
+                return url
+            else:
+                return url
+
+            # Auto-encode special characters in password (e.g. @, #, %)
+            if "@" in rest:
+                auth_part, host_part = rest.rsplit("@", 1)
+                if ":" in auth_part:
+                    user, password = auth_part.split(":", 1)
+                    unquoted_pw = urllib.parse.unquote(password)
+                    quoted_pw = urllib.parse.quote(unquoted_pw, safe="")
+                    return f"{prefix}{user}:{quoted_pw}@{host_part}"
+                return f"{prefix}{rest}"
+            return f"{prefix}{rest}"
+
+        # Strict Supabase requirement: no local SQLite fallback
+        raise ValueError(
+            "DATABASE_URL is not configured! Please provide your Supabase PostgreSQL connection string in .env or Render environment variables."
+        )
 
     class Config:
         env_file = ".env"
