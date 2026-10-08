@@ -46,6 +46,13 @@ def run_auto_migrations(db_engine):
                     logger.info("Auto-migrating: relaxed 'phone_number' NOT NULL constraint on PostgreSQL.")
                 except Exception:
                     pass
+
+            # Reset trust_rating to NULL for users who have 0 completed rentals so they display as New Peer
+            try:
+                with db_engine.begin() as conn:
+                    conn.execute(text("UPDATE users SET trust_rating = NULL WHERE (completed_rentals = 0 OR completed_rentals IS NULL) AND trust_rating = 5.0;"))
+            except Exception:
+                pass
     except Exception as e:
         logger.warning("Auto-migration check notice: %s", e)
 

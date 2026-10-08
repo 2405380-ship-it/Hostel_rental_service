@@ -146,7 +146,7 @@ def get_public_profile(username: str, db: Session = Depends(get_db)):
         username=user.username or "anonymous",
         display_name=user.display_name or "Hostel Peer",
         avatar_url=user.avatar_url,
-        trust_rating=round(user.trust_rating or 5.0, 1),
+        trust_rating=round(user.trust_rating, 1) if user.trust_rating is not None else None,
         completed_rentals=user.completed_rentals or 0,
         active_listings=item_summaries
     )

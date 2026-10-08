@@ -13,7 +13,7 @@ class User(Base):
     username = Column(String(50), unique=True, index=True, nullable=True)
     hostel_block = Column(String(100), nullable=True)
     avatar_url = Column(String(500), nullable=True)
-    trust_rating = Column(Float, default=5.0)
+    trust_rating = Column(Float, nullable=True, default=None)
     completed_rentals = Column(Integer, default=0)
     is_onboarded = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)

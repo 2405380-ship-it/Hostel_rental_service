@@ -226,10 +226,16 @@ export default function MyRentals({ user, onOpenLogin }) {
                         {counterparty ? (
                           <Link to={`/u/${counterparty.username}`} className="text-zinc-900 hover:underline font-semibold flex items-center gap-1">
                             <span>{counterparty.display_name || `@${counterparty.username}`}</span>
-                            <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-zinc-600 bg-zinc-100 px-1 py-0.2 rounded border border-zinc-200">
-                              <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-500" />
-                              <span>{counterparty.trust_rating?.toFixed(1) || '5.0'}</span>
-                            </span>
+                            {counterparty.trust_rating != null ? (
+                              <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-zinc-600 bg-zinc-100 px-1 py-0.2 rounded border border-zinc-200">
+                                <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-500" />
+                                <span>{counterparty.trust_rating.toFixed(1)}</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center text-[9px] font-medium text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
+                                New Peer
+                              </span>
+                            )}
                           </Link>
                         ) : (
                           <span>Peer</span>

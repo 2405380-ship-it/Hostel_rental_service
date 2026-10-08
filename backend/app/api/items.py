@@ -24,7 +24,7 @@ def format_item_out(item: Item) -> ItemOut:
             username=item.lender.username,
             display_name=item.lender.display_name,
             avatar_url=item.lender.avatar_url,
-            trust_rating=round(item.lender.trust_rating or 5.0, 1),
+            trust_rating=round(item.lender.trust_rating, 1) if item.lender.trust_rating is not None else None,
             completed_rentals=item.lender.completed_rentals or 0
         )
     return ItemOut(

@@ -34,7 +34,7 @@ erDiagram
         string username UK "Regex validated ^[a-zA-Z0-9_]{3,20}$"
         string hostel_block "Block & Wing (Private)"
         string avatar_url "Supabase storage link"
-        float trust_rating "Aggregated peer score (1.0 - 5.0)"
+        float trust_rating "Aggregated peer score (null = New Peer, 1.0 - 5.0 after reviews)"
         int completed_rentals "Completed deals counter"
         boolean is_onboarded "Flag for profile completeness"
         datetime created_at "Registration timestamp"
@@ -131,7 +131,7 @@ Stores student accounts authenticated via phone OTP. Contains identity details, 
 | `username` | `VARCHAR(50)` | `UNIQUE`, `INDEX`, `NULLABLE` | `NULL` | Campus handle matching `^[a-zA-Z0-9_]{3,20}$`. |
 | `hostel_block` | `VARCHAR(100)` | `NULLABLE` | `NULL` | Hostel wing and room. **Strictly private; omitted from public profiles.** |
 | `avatar_url` | `VARCHAR(500)` | `NULLABLE` | `NULL` | Public HTTPS link to user avatar in Supabase Storage. |
-| `trust_rating` | `FLOAT` | `NOT NULL` | `5.0` | Running average of peer reviews (1.0 to 5.0). |
+| `trust_rating` | `FLOAT` | `NULLABLE` | `NULL` | Running average of peer reviews (1.0 to 5.0). `NULL` indicates a new peer with no reviews yet. |
 | `completed_rentals` | `INTEGER` | `NOT NULL` | `0` | Number of successfully completed transactions. |
 | `is_onboarded` | `BOOLEAN` | `NOT NULL` | `FALSE` | Set to `TRUE` after user completes initial profile setup. |
 | `created_at` | `TIMESTAMP` | `NOT NULL` | `utcnow()` | Account registration timestamp. |

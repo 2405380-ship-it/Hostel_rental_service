@@ -113,7 +113,7 @@ def verify_otp(payload: VerifyOTPIn, db: Session = Depends(get_db)):
             display_name=None,
             username=None,
             hostel_block=None,
-            trust_rating=5.0,
+            trust_rating=None,
             completed_rentals=0,
             is_onboarded=False
         )

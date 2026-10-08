@@ -103,10 +103,16 @@ export default function Navbar({ user, onOpenLogin, onLogout }) {
                       <p className="text-xs font-bold text-zinc-900 leading-tight">
                         {user.display_name || `@${user.username}`}
                       </p>
-                      <p className="text-[10px] font-mono text-zinc-500 flex items-center gap-1">
-                        <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-500" />
-                        <span>{user.trust_rating ? user.trust_rating.toFixed(1) : '5.0'}</span>
-                      </p>
+                      <div className="text-[10px] font-mono text-zinc-500 flex items-center gap-1">
+                        {user.trust_rating != null ? (
+                          <>
+                            <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-500" />
+                            <span>{user.trust_rating.toFixed(1)}</span>
+                          </>
+                        ) : (
+                          <span className="text-emerald-700 font-sans font-medium text-[9px] bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">New Peer</span>
+                        )}
+                      </div>
                     </div>
                   </button>
 

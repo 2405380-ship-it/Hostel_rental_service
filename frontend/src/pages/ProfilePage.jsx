@@ -108,10 +108,16 @@ export default function ProfilePage({ currentUser }) {
           <div className="flex sm:flex-col gap-2 shrink-0">
             {/* Trust Rating Card */}
             <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 text-center min-w-[110px]">
-              <div className="flex items-center justify-center gap-1 text-zinc-900 font-black font-mono text-lg">
-                <Star className="w-4 h-4 fill-amber-400 text-amber-500" />
-                <span>{profile.trust_rating ? profile.trust_rating.toFixed(1) : '5.0'}</span>
-              </div>
+              {profile.trust_rating != null ? (
+                <div className="flex items-center justify-center gap-1 text-zinc-900 font-black font-mono text-lg">
+                  <Star className="w-4 h-4 fill-amber-400 text-amber-500" />
+                  <span>{profile.trust_rating.toFixed(1)}</span>
+                </div>
+              ) : (
+                <div className="text-emerald-700 font-bold font-mono text-sm py-0.5">
+                  <span>New Peer</span>
+                </div>
+              )}
               <p className="text-[9px] font-mono uppercase text-zinc-400 font-bold tracking-wider mt-0.5">
                 Trust Score
               </p>

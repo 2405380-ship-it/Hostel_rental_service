@@ -61,7 +61,7 @@ Verifies OTP code, provisions new user account shell if first login, and returns
     "username": null,
     "hostel_block": null,
     "avatar_url": null,
-    "trust_rating": 5.0,
+    "trust_rating": null,
     "completed_rentals": 0,
     "is_onboarded": false,
     "created_at": "2026-09-23T12:00:00"

@@ -98,10 +98,16 @@ export default function ItemCard({ item }) {
               </span>
             </div>
 
-            <div className="flex items-center gap-1 text-[10px] font-mono font-bold text-zinc-700 bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200">
-              <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-500" />
-              <span>{item.lender.trust_rating ? item.lender.trust_rating.toFixed(1) : '5.0'}</span>
-            </div>
+            {item.lender.trust_rating != null ? (
+              <div className="flex items-center gap-1 text-[10px] font-mono font-bold text-zinc-700 bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200">
+                <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-500" />
+                <span>{item.lender.trust_rating.toFixed(1)}</span>
+              </div>
+            ) : (
+              <div className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                <span>New Peer</span>
+              </div>
+            )}
           </div>
         )}
       </div>

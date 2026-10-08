@@ -221,12 +221,18 @@ export default function ItemDetail({ user, onOpenLogin }) {
                 </Link>
 
                 <div className="text-right">
-                  <div className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-zinc-700 bg-white px-1.5 py-0.5 rounded border border-zinc-200">
-                    <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-500" />
-                    <span>{item.lender.trust_rating ? item.lender.trust_rating.toFixed(1) : '5.0'}</span>
-                  </div>
+                  {item.lender.trust_rating != null ? (
+                    <div className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-zinc-700 bg-white px-1.5 py-0.5 rounded border border-zinc-200">
+                      <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-500" />
+                      <span>{item.lender.trust_rating.toFixed(1)}</span>
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center text-[10px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                      <span>New Peer</span>
+                    </div>
+                  )}
                   <p className="text-[9px] text-zinc-400 font-mono mt-0.5">
-                    {item.lender.completed_rentals || 0} deals
+                    {item.lender.completed_rentals || 0} completed
                   </p>
                 </div>
               </div>

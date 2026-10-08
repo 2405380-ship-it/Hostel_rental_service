@@ -49,7 +49,7 @@ def format_rental_out(rental: RentalRequest, current_user_id: int) -> RentalOut:
             username=rental.lender.username,
             display_name=rental.lender.display_name,
             avatar_url=rental.lender.avatar_url,
-            trust_rating=round(rental.lender.trust_rating or 5.0, 1),
+            trust_rating=round(rental.lender.trust_rating, 1) if rental.lender.trust_rating is not None else None,
             completed_rentals=rental.lender.completed_rentals or 0
         )
 
@@ -60,7 +60,7 @@ def format_rental_out(rental: RentalRequest, current_user_id: int) -> RentalOut:
             username=rental.borrower.username,
             display_name=rental.borrower.display_name,
             avatar_url=rental.borrower.avatar_url,
-            trust_rating=round(rental.borrower.trust_rating or 5.0, 1),
+            trust_rating=round(rental.borrower.trust_rating, 1) if rental.borrower.trust_rating is not None else None,
             completed_rentals=rental.borrower.completed_rentals or 0
         )
 
@@ -399,7 +399,7 @@ def submit_review(
         username=current_user.username,
         display_name=current_user.display_name,
         avatar_url=current_user.avatar_url,
-        trust_rating=current_user.trust_rating or 5.0,
+        trust_rating=current_user.trust_rating,
         completed_rentals=current_user.completed_rentals or 0
     )
 

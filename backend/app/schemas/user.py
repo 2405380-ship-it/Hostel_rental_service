@@ -36,7 +36,7 @@ class UserBasicOut(BaseModel):
     username: Optional[str]
     display_name: Optional[str]
     avatar_url: Optional[str]
-    trust_rating: float = 5.0
+    trust_rating: Optional[float] = None
     completed_rentals: int = 0
 
     class Config:
@@ -50,7 +50,7 @@ class UserOut(BaseModel):
     username: Optional[str]
     hostel_block: Optional[str]
     avatar_url: Optional[str]
-    trust_rating: float
+    trust_rating: Optional[float] = None
     completed_rentals: int
     is_onboarded: bool
     created_at: datetime
@@ -86,7 +86,7 @@ class PublicProfileOut(BaseModel):
     username: str
     display_name: str
     avatar_url: Optional[str] = None
-    trust_rating: float = 5.0
+    trust_rating: Optional[float] = None
     completed_rentals: int = 0
     active_listings: List[ItemSummaryOut] = []
 
